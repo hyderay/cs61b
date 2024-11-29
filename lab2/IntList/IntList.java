@@ -9,6 +9,14 @@ public class IntList {
         rest = r;
     }
 
+    /** Add integer a to the last position of the IntList **/
+    public static void addLast(int a, IntList i) {
+        while (i.rest != null) {
+            i = i.rest;
+        }
+        i.rest = new IntList(a, null);
+    }
+
     /** Return the size of the list using... recursion! */
     public int size() {
         if (rest == null) {
