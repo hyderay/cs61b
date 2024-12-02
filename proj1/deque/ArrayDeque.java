@@ -27,7 +27,7 @@ public class ArrayDeque<Item> {
             resize(lst.length * 2);
         } else if (nextLast == lst.length) {
             resize(lst.length * 2);
-        } else if (size() / lst.length < 0.25) {
+        } else if (size() < (lst.length) / 4 && size() > 8) {
             resize(lst.length / 2);
         }
     }
