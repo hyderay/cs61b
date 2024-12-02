@@ -55,10 +55,11 @@ public class ArrayDeque<Item> {
     }
 
     public Item get(int index) {
-        if (isEmpty()) {
+        if (index >= 0 && index < lst.length){
+            return lst[index + nextFirst + 1];
+        } else {
             return null;
         }
-        return lst[index + nextFirst + 1];
     }
 
     public Item removeFirst() {
