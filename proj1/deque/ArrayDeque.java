@@ -55,7 +55,7 @@ public class ArrayDeque<Item> {
     }
 
     public Item get(int index) {
-        if (index >= 0 && index < lst.length){
+        if (index >= 0 && index < size()){
             return lst[index + nextFirst + 1];
         } else {
             return null;
