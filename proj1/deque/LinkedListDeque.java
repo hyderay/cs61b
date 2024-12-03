@@ -50,10 +50,7 @@ public class LinkedListDeque<T> {
     }
 
     public boolean isEmpty() {
-        if (size == 0) {
-            return true;
-        }
-        return false;
+        return size() == 0;
     }
 
     public int size() {
@@ -61,17 +58,22 @@ public class LinkedListDeque<T> {
     }
 
     public T get(int index) {
-        if (isEmpty()) {
+        if (index < 0 || index >= size) {
             return null;
         }
-        Node<T> newNode = sentinel.next;
-        for (int i = 0; i < index; i++) {
-           newNode = newNode.next;
-           if (newNode.item == null) {
-               return null;
-           }
-       }
-       return newNode.item;
+        Node<T> currentNode;
+        if (index < size / 2) {
+            currentNode = sentinel.next;
+            for (int i = 0; i < index; i++) {
+                currentNode = currentNode.next;
+            }
+        } else {
+            currentNode = sentinel.prev;
+            for (int i = size - 1; i > index; i--) {
+                currentNode = currentNode.prev;
+            }
+        }
+        return currentNode.item;
     }
 
     public void printDeque() {
@@ -99,7 +101,8 @@ public class LinkedListDeque<T> {
         if (isEmpty()) {
             return null;
         }
-        T last = this.get(size-1);
+        Node<T> lastNode = sentinel.prev;
+        T last = lastNode.item;
         Node<T> lastPrev = sentinel.prev.prev;
         sentinel.prev = lastPrev;
         lastPrev.next = sentinel;
