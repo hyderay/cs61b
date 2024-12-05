@@ -1,6 +1,6 @@
 package deque;
 
-public class ArrayDeque<Item> {
+public class ArrayDeque<Item> implements Deque<Item> {
     private Item[] lst;
     private int size;
     private int nextFirst;
@@ -33,14 +33,12 @@ public class ArrayDeque<Item> {
         }
     }
 
+    @Override
     public int size() {
         return size;
     }
 
-    public boolean isEmpty() {
-        return size() == 0;
-    }
-
+    @Override
     public void addFirst(Item t) {
         checkUsage();
         lst[nextFirst] = t;
@@ -48,6 +46,7 @@ public class ArrayDeque<Item> {
         nextFirst = (nextFirst - 1 + lst.length) % lst.length;
     }
 
+    @Override
     public void addLast(Item t) {
         checkUsage();
         lst[nextLast] = t;
@@ -55,6 +54,7 @@ public class ArrayDeque<Item> {
         nextLast = (nextLast + 1) % lst.length;
     }
 
+    @Override
     public Item get(int index) {
         if (isEmpty()) {
             return null;
@@ -62,6 +62,7 @@ public class ArrayDeque<Item> {
         return lst[(nextFirst + 1 + index) % lst.length];
     }
 
+    @Override
     public Item removeFirst() {
         if (isEmpty()) {
             return null;
@@ -73,6 +74,7 @@ public class ArrayDeque<Item> {
         return t;
     }
 
+    @Override
     public Item removeLast() {
         if (isEmpty()) {
             return null;
@@ -84,6 +86,7 @@ public class ArrayDeque<Item> {
         return t;
     }
 
+    @Override
     public void printDeque() {
         for (int i = 0; i < size(); i++) {
             System.out.print(lst[(nextFirst + 1 + i) % 12] + " ");
