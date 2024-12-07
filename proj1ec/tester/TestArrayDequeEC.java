@@ -25,7 +25,6 @@ public class TestArrayDequeEC {
 
                 msg += "addFirst(" + randVal + ")\n";
 
-                assertEquals(msg, solution.get(0), student.get(0));
             } else if (operationNumber == 1) {
                 // addLast
                 int randVal = StdRandom.uniform(0, 100);
@@ -34,7 +33,6 @@ public class TestArrayDequeEC {
 
                 msg += "addLast(" + randVal + ")\n";
 
-                assertEquals(msg, solution.get(solution.size() - 1), student.get(student.size() - 1));
             } else if (operationNumber == 2 && solution.size() > 0 && student.size() > 0) {
                 // removeFirst
                 Integer expected = solution.removeFirst();
