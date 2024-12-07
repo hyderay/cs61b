@@ -33,14 +33,14 @@ public class TestArrayDequeEC {
                         ". But get " + actual, expected, actual);
 
             } else if (random == 2 && !solution.isEmpty() && !student.isEmpty()) {
-                int expected = solution.removeFirst();
-                int actual = student.removeFirst();
+                Integer expected = solution.removeFirst();
+                Integer actual = student.removeFirst();
                 assertEquals(expected + " should be remove as the first one. But " +
                         actual + " is removed", expected, actual);
 
             } else if (random == 3 && !solution.isEmpty() && !student.isEmpty()) {
-                int expected = solution.removeLast();
-                int actual = student.removeLast();
+                Integer expected = solution.removeLast();
+                Integer actual = student.removeLast();
                 assertEquals(expected + " should be remove as the last one. But " +
                         actual + " is removed", expected, actual);
             }
