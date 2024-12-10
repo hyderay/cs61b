@@ -123,7 +123,8 @@ public class ArrayDeque<Item> implements Deque<Item>, Iterable<Item> {
         if (o == this) {
             return true;
         }
-        if (o instanceof ArrayDeque sets) {
+        if (o instanceof ArrayDeque) {
+            ArrayDeque sets = (ArrayDeque) o;
             if (size() != sets.size()) {
                 return false;
             }
