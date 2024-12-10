@@ -118,6 +118,7 @@ public class ArrayDeque<Item> implements Deque<Item>, Iterable<Item> {
         }
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;
