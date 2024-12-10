@@ -15,16 +15,17 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
         return max(c);
     }
 
-    public T max(Comparator<T> c) {
+    public T max(Comparator<T> d) {
         if (isEmpty()) {
             return null;
         }
         int maxIndex = 0;
         for (int i = 1; i < size(); i++) {
-            if (c.compare(get(i), get(maxIndex)) > 0) {
+            if (d.compare(get(i), get(maxIndex)) > 0) {
                 maxIndex = i;
             }
         }
         return this.get(maxIndex);
     }
+
 }

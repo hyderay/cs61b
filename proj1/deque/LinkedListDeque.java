@@ -40,7 +40,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public void addLast(T item) {
-         if (isEmpty()) {
+        if (isEmpty()) {
             Node<T> newNode = new Node<>(sentinel, item, sentinel);
             sentinel.next = newNode;
             sentinel.prev = newNode;
@@ -124,11 +124,11 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         return t;
     }
 
-    public Node<T> getRecursiveHelper(Node<T> t, int index) {
+    private Node<T> getRecursiveHelper(Node<T> t, int index) {
         if (index == 0) {
             return t;
         }
-        return getRecursiveHelper(t.next, index-1);
+        return getRecursiveHelper(t.next, index - 1);
     }
 
     public Iterator<T> iterator() {
@@ -138,7 +138,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private class LinkedListDequeIterator implements Iterator<T> {
         private int wizPos;
 
-        public LinkedListDequeIterator() {
+        LinkedListDequeIterator() {
             wizPos = 0;
         }
 
@@ -153,15 +153,6 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         }
     }
 
-
-    /**
-     * Checks if the specified object is equal to this deque.
-     * Two deques are considered equal if they are of the same type, have the same size,
-     * and contain the same elements in the same order.
-     *
-     * @param o the object to be compared for equality with this deque
-     * @return true if the specified object is equal to this deque; false otherwise
-     */
     @Override
     public boolean equals(Object o) {
         if (o == this) {
@@ -182,4 +173,5 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         }
         return false;
     }
+
 }
