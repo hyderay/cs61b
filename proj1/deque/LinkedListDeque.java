@@ -1,6 +1,8 @@
 package deque;
 
-public class LinkedListDeque<T> implements Deque<T> {
+import java.util.Iterator;
+
+public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private class Node<T> {
         private Node prev;
         private T item;
@@ -79,7 +81,7 @@ public class LinkedListDeque<T> implements Deque<T> {
     @Override
     public void printDeque() {
         for (int i = 0; i < size; i++) {
-            T t = this.get(i);
+            T t = get(i);
             System.out.print(t + " ");
         }
         System.out.println();
@@ -127,5 +129,54 @@ public class LinkedListDeque<T> implements Deque<T> {
             return t;
         }
         return getRecursiveHelper(t.next, index-1);
+    }
+
+    public Iterator<T> iterator() {
+        return new LinkedListDequeIterator();
+    }
+
+    private class LinkedListDequeIterator implements Iterator<T> {
+        private int wizPos;
+
+        public LinkedListDequeIterator() {
+            wizPos = 0;
+        }
+
+        public boolean hasNext() {
+            return wizPos < size();
+        }
+
+        public T next() {
+            T returnItem = get(wizPos);
+            wizPos++;
+            return returnItem;
+        }
+    }
+
+    private boolean contains(Object x) {
+        for (T y : this) {
+            if (y.equals(x)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o instanceof LinkedListDeque sets) {
+            if (size() != sets.size()) {
+                return false;
+            }
+            for (T x : this) {
+                if (!sets.contains(x)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 }
