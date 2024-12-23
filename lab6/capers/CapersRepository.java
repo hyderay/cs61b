@@ -76,5 +76,6 @@ public class CapersRepository {
         File f = join(Dog.DOG_FOLDER, name);
         Dog dog = readObject(f, Dog.class);
         dog.haveBirthday();
+        dog.saveDog();
     }
 }
