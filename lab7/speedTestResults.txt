@@ -1,0 +1,10 @@
+This program inserts random Strings of length L into different types of maps as <String, Integer> pairs.
+Please enter desired length of each string: oahohraph
+Please enter a positive integer: 1000
+
+Enter # strings to insert into the maps: ajarr
+Please enter a positive integer: 1000
+class bstmap.ULLMap: 0.03 sec
+class bstmap.BSTMap: 0.01 sec
+Java's Built-in TreeMap: 0.01 sec
+Java's Built-in HashMap: 0.01 sec
