@@ -1,7 +1,9 @@
 package gitlet;
 
+import static java.lang.System.exit;
+
 /** Driver class for Gitlet, a subset of the Git version-control system.
- *  @author TODO
+ *  @author Sean
  */
 public class Main {
 
@@ -9,7 +11,10 @@ public class Main {
      *  <COMMAND> <OPERAND1> <OPERAND2> ... 
      */
     public static void main(String[] args) {
-        // TODO: what if args is empty?
+        if (args.length == 0) {
+            exit("Please enter a command");
+        }
+
         String firstArg = args[0];
         switch(firstArg) {
             case "init":
@@ -20,5 +25,9 @@ public class Main {
                 break;
             // TODO: FILL THE REST IN
         }
+    }
+
+    private static void checkValidity(String ) {
+
     }
 }
