@@ -12,7 +12,7 @@ public class MyUtils {
         }
     }
 
-    public static void checkWorkingDir() {
+    public static void checkInit() {
         if (!(Repository.GITLET_DIR.exists())) {
             exit("Not in an initialized Gitlet directory.");
         }

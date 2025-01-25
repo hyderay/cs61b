@@ -22,8 +22,7 @@ public class Main {
                 Repository.init();
                 break;
             case "add":
-                /** make sure it's in the folder which is initialized. **/
-                // TODO
+                checkInit();
                 checkValidity(args, 2);
                 Repository.add(args[2]);
                 break;
