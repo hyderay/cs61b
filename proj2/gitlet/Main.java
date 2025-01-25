@@ -22,7 +22,10 @@ public class Main {
                 Repository.init();
                 break;
             case "add":
-                // TODO: handle the `add [filename]` command
+                /** make sure it's in the folder which is initialized. **/
+                // TODO
+                checkValidity(args, 2);
+                Repository.add(args[2]);
                 break;
             // TODO: FILL THE REST IN
         }

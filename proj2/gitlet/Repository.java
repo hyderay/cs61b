@@ -44,5 +44,10 @@ public class Repository {
         REFS_DIR.mkdir();
         OBJECTS_DIR.mkdir();
         /** lack of branch and commit **/
+        //TODO
+    }
+
+    public static void add(String fileName) {
+
     }
 }
