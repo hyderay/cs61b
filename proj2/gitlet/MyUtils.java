@@ -11,4 +11,10 @@ public class MyUtils {
             exit("Incorrect operands.");
         }
     }
+
+    public static void checkWorkingDir() {
+        if (!(Repository.GITLET_DIR.exists())) {
+            exit("Not in an initialized Gitlet directory.");
+        }
+    }
 }

@@ -4,7 +4,6 @@ import java.io.File;
 
 import static gitlet.MyUtils.*;
 import static gitlet.Utils.*;
-import gitlet.Staging.*;
 
 // TODO: any imports you need here
 
@@ -50,8 +49,7 @@ public class Repository {
 
     public static void add(String fileName) {
         File f = new File(fileName);
-        /** Check the current file whether exists in CWD **/
-        //TODO
+        checkWorkingDir();
         Staging.add(f);
     }
 }
