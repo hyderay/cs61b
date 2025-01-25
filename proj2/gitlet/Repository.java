@@ -49,10 +49,10 @@ public class Repository {
 
     public static void add(String fileName) {
         File f = new File(fileName);
-        /** check if the file exists
-         * TODO
-         */
-        //checkWorkingDir();
+        checkInit();
+        if (!(f.exists())) {
+            exit("File does not exist.");
+        }
         Staging.add(f);
     }
 }
