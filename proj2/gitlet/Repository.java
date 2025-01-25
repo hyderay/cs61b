@@ -4,6 +4,7 @@ import java.io.File;
 
 import static gitlet.MyUtils.*;
 import static gitlet.Utils.*;
+import gitlet.Staging.*;
 
 // TODO: any imports you need here
 
@@ -26,11 +27,11 @@ public class Repository {
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
-    /** The head file **/
+    /** The head file */
     private static final File HEAD_DIR = join(GITLET_DIR, "HEAD");
-    /** The refs dictionary **/
+    /** The refs dictionary */
     private static final File REFS_DIR = join(GITLET_DIR, "refs");
-    /** The objects dictionary **/
+    /** The objects dictionary */
     private static final File OBJECTS_DIR = join(GITLET_DIR, "objects");
 
 
@@ -43,11 +44,14 @@ public class Repository {
         HEAD_DIR.mkdir();
         REFS_DIR.mkdir();
         OBJECTS_DIR.mkdir();
-        /** lack of branch and commit **/
+        /** lack of branch and commit */
         //TODO
     }
 
     public static void add(String fileName) {
-
+        File f = new File(fileName);
+        /** Check the current file whether exists in CWD **/
+        //TODO
+        Staging.add(f);
     }
 }

@@ -1,6 +1,6 @@
 package gitlet;
 
-import static gitlet.MyUtils.exit;
+import static gitlet.MyUtils.*;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author Sean
@@ -28,12 +28,6 @@ public class Main {
                 Repository.add(args[2]);
                 break;
             // TODO: FILL THE REST IN
-        }
-    }
-
-    private static void checkValidity(String[] args, int n) {
-        if (args.length != n) {
-            exit("Incorrect operands.");
         }
     }
 }
