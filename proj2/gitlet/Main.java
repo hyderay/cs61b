@@ -1,6 +1,6 @@
 package gitlet;
 
-import static java.lang.System.exit;
+import static gitlet.MyUtils.exit;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author Sean
@@ -12,13 +12,14 @@ public class Main {
      */
     public static void main(String[] args) {
         if (args.length == 0) {
-            exit("Please enter a command");
+            exit("Please enter a command.");
         }
 
         String firstArg = args[0];
         switch(firstArg) {
             case "init":
-                // TODO: handle the `init` command
+                checkValidity(args, 1);
+                Repository.init();
                 break;
             case "add":
                 // TODO: handle the `add [filename]` command
@@ -27,7 +28,9 @@ public class Main {
         }
     }
 
-    private static void checkValidity(String ) {
-
+    private static void checkValidity(String[] args, int n) {
+        if (args.length != n) {
+            exit("Incorrect operands.");
+        }
     }
 }

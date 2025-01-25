@@ -1,6 +1,8 @@
 package gitlet;
 
 import java.io.File;
+
+import static gitlet.MyUtils.*;
 import static gitlet.Utils.*;
 
 // TODO: any imports you need here
@@ -24,8 +26,23 @@ public class Repository {
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
+    /** The head file **/
+    private static final File HEAD_DIR = join(GITLET_DIR, "HEAD");
+    /** The refs dictionary **/
+    private static final File REFS_DIR = join(GITLET_DIR, "refs");
+    /** The objects dictionary **/
+    private static final File OBJECTS_DIR = join(GITLET_DIR, "objects");
+
+
 
     public static void init() {
-
+        if (GITLET_DIR.exists()) {
+            exit("A Gitlet version-control system already exists in the current directory.");
+        }
+        GITLET_DIR.mkdir();
+        HEAD_DIR.mkdir();
+        REFS_DIR.mkdir();
+        OBJECTS_DIR.mkdir();
+        /** lack of branch and commit **/
     }
 }
