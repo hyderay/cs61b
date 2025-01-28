@@ -147,9 +147,28 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         return size;
     }
 
+    private void resize() {
+        Collection<Node>[] oldBuckets = buckets;
+        buckets = createTable(buckets.length * 2);
+        size = 0;
+
+        for (Collection<Node> bucket : oldBuckets) {
+            if (!(bucket == null)) {
+                for (Node node : bucket) {
+                    put(node.key, node.value);
+                }
+            }
+        }
+    }
+
     @Override
     public void put(K key, V value) {
+        if ((double) size / buckets.length >= maxLoad) {
+            resize();
+        }
+
         int index = getIndex(key);
+
         if (buckets[index] == null) {
             buckets[index] = createBucket();
         }
