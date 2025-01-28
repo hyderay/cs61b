@@ -1,0 +1,30 @@
+What would you like L to be?: 10
+
+Enter # strings to insert into hashmap.ULLMap: aohoiaho
+Please enter a positive integer: 10
+class hashmap.ULLMap: 0.00 sec
+
+Enter # strings to insert into your hashmap.MyHashMap: oiahoihoaf
+Please enter a positive integer: 10
+class hashmap.MyHashMap: 0.00 sec
+
+Enter # strings to insert into Java's HashMap: lahiaolf
+Please enter a positive integer: 4
+Java's Built-in HashMap: 0.00 sec
+
+
+Enter # strings to insert into hashmap.ULLMap: oahohphpaih
+Please enter a positive integer: 10
+class hashmap.ULLMap: 0.00 sec
+
+/**     */
+
+What would you like L to be?: 1000
+
+Enter # strings to insert into each map: ajdbafoae
+Please enter a positive integer: 1000
+class hashmap.MyHashMapALBuckets: 0.02 sec
+class hashmap.MyHashMapLLBuckets: 0.01 sec
+class hashmap.MyHashMapTSBuckets: 0.01 sec
+class hashmap.MyHashMapHSBuckets: 0.01 sec
+class hashmap.MyHashMapPQBuckets: 0.01 sec
