@@ -33,7 +33,7 @@ public class Repository {
     /** The objects dictionary for storing commits. */
     private static final File OBJECTS_DIR = join(GITLET_DIR, "objects");
     /** The commit dictionary for storing commit. */
-    private static final File COMMIT_DIR = join(GITLET_DIR, "commits");
+    private static final File COMMIT_DIR = join(GITLET_DIR, "commit");
 
 
 
@@ -54,5 +54,9 @@ public class Repository {
         File f = new File(fileName);
         checkInit();
         Staging.add(f);
+    }
+
+    public static File getHeadFile() {
+        return HEAD_FILE;
     }
 }

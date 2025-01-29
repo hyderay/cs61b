@@ -1,26 +1,63 @@
 package gitlet;
 
-// TODO: any imports you need here
+import java.io.File;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashMap;
 
-import java.util.Date; // TODO: You'll likely use this in this class
+import static gitlet.Utils.*;
+import static gitlet.MyUtils.*;
 
 /** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
+ *  Each commit records a snapshot of the working dictionary's tracked files.
+ *  A commit keeps track of:
+ *  - The commit message
+ *  - The timestamp of when the commit was created
+ *  - A reference to parent commit
+ *  - A mapping of file names to their blob reference (sha1 ID)
+ *  - A Sha1 ID of current commit
+ *
+ *  A commit snapshot is created based on:
+ *  - Files from previous commit
+ *  - Files staged for addition
+ *  - Files staged for removal
  *
  *  @author Sean
  */
-public class Commit {
-    /**
-     * TODO: add instance variables here.
-     *
-     * List all instance variables of the Commit class here with a useful
-     * comment above them describing what that variable represents and how that
-     * variable is used. We've provided one example for `message`.
-     */
-
+public class Commit implements Serializable {
     /** The message of this Commit. */
     private String message;
+    /** The timestamp of this commit. */
+    private Date timestamp;
+    /** The sha1 of the parent commit. */
+    private String parent;
+    /** A Map from current file name to its sha1 blob id. */
+    private HashMap<String, String> blobFiles;
+    /** Current commit ID. */
+    private String commitID;
 
-    /* TODO: fill in the rest of this class. */
+    /** Constructor for initial commit. */
+    public Commit() {
+        message = "initial commit";
+        timestamp = new Date(0);
+        parent = null;
+        blobFiles = new HashMap<>();
+        generateCommitID();
+        saveCommit();
+    }
+
+    
+
+    /** Generate commit ID. */
+    private void generateCommitID() {
+        commitID = sha1(message, timestamp.toString(), parent, blobFiles.toString());
+    }
+
+    /** Save the commit and update head. */
+    private void saveCommit() {
+        File commitFile = toCommitPath(commitID);
+        writeObject(commitFile, this);
+        File headFile = Repository.getHeadFile();
+        writeContents(headFile, commitID);
+    }
 }
