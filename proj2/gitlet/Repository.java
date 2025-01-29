@@ -50,9 +50,6 @@ public class Repository {
     public static void add(String fileName) {
         File f = new File(fileName);
         checkInit();
-        if (!(f.exists())) {
-            exit("File does not exist.");
-        }
         Staging.add(f);
     }
 }

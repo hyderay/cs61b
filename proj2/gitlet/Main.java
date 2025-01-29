@@ -24,7 +24,7 @@ public class Main {
             case "add":
                 checkInit();
                 checkValidity(args, 2);
-                Repository.add(args[2]);
+                Repository.add(args[1]);
                 break;
             // TODO: FILL THE REST IN
         }
