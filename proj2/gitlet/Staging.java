@@ -27,14 +27,44 @@ public class Staging implements Serializable {
     }
 
     /** Add a file to the staging area. */
-    public static void add(File f) {
-        if (!(f.exists())) {
+    public void add(File f) {
+        if (!f.exists()) {
             exit("File does not exist.");
         }
         String content = readContentsAsString(f);
         String fileHash = sha1(content);
-        /** To be continued
-         * TODO
-         * */
+
+        Commit head = getHeadCommit();
+
+        /** If file is unchanged compared to the head commit, remove from staging area. */
+        if (head.getFileHash(f.getName()) != null && fileHash.equals(head.getFileHash(f.getName()))) {
+            stagedFiles.remove(f.getName());
+        } else {
+            stagedFiles.put(f.getName(), fileHash);
+        }
+
+        removedFiles.remove(f.getName());
+        save();
     }
+
+    /** Remove a file from staging area. */
+    public void remove(File f) {
+        Commit head = getHeadCommit();
+
+        if (stagedFiles.containsKey(f.getName())) {
+            stagedFiles.remove(f.getName());
+        } else if (head.getFileHash(f.getName()) != null) {
+            removedFiles.put(f.getName(), head.getFileHash(f.getName()));
+        } else {
+            exit("No reason to remove the file.");
+        }
+
+        save();
+    }
+
+    /** Save the staging area to disk. */
+    private void save() {
+        writeObject(STAGING_FILE, this);
+    }
+    
 }
