@@ -12,13 +12,17 @@ public class Staging implements Serializable {
     private static final File STAGING_FILE = join(".gitlet", "staging");
     /** Map to store staged files */
     private HashMap<String, String> stagedFiles;
+    /** Map to store removed files */
+    private HashMap<String, String> removedFiles;
 
     public Staging() {
         if (STAGING_FILE.exists()) {
             Staging loaded = readObject(STAGING_FILE, Staging.class);
             this.stagedFiles = loaded.stagedFiles;
+            this.removedFiles = loaded.removedFiles;
         } else {
             stagedFiles = new HashMap<>();
+            removedFiles = new HashMap<>();
         }
     }
 
@@ -29,6 +33,8 @@ public class Staging implements Serializable {
         }
         String content = readContentsAsString(f);
         String fileHash = sha1(content);
-        /** To be continued */
+        /** To be continued
+         * TODO
+         * */
     }
 }
