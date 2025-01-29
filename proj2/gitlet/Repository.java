@@ -26,12 +26,15 @@ public class Repository {
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
-    /** The head file */
-    private static final File HEAD_DIR = join(GITLET_DIR, "HEAD");
-    /** The refs dictionary */
+    /** The head file for storing heads. */
+    private static final File HEAD_FILE = join(GITLET_DIR, "HEAD");
+    /** The refs dictionary for storing branches. */
     private static final File REFS_DIR = join(GITLET_DIR, "refs");
-    /** The objects dictionary */
+    /** The objects dictionary for storing commits. */
     private static final File OBJECTS_DIR = join(GITLET_DIR, "objects");
+    /** The commit dictionary for storing commit. */
+    private static final File COMMIT_DIR = join(GITLET_DIR, "commits");
+
 
 
 
@@ -40,9 +43,9 @@ public class Repository {
             exit("A Gitlet version-control system already exists in the current directory.");
         }
         GITLET_DIR.mkdir();
-        HEAD_DIR.mkdir();
         REFS_DIR.mkdir();
         OBJECTS_DIR.mkdir();
+        COMMIT_DIR.mkdir();
         /** lack of branch and commit */
         //TODO
     }
