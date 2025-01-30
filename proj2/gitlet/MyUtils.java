@@ -29,4 +29,12 @@ public class MyUtils {
     public static File toCommitPath(String commitID) {
         return join(".gitlet", "commit", commitID);
     }
+
+    /** Return the head as a Commit Object. */
+    public static Commit getHeadCommit() {
+        File headFile = join(".gitlet", "HEAD");
+        String headCommitHash = readContentsAsString(headFile);
+        File commitFile = join(".gitlet", "commit", headCommitHash);
+        return readObject(commitFile, Commit.class);
+    }
 }
