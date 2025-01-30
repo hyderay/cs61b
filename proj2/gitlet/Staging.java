@@ -66,5 +66,12 @@ public class Staging implements Serializable {
     private void save() {
         writeObject(STAGING_FILE, this);
     }
-    
+
+    public HashMap<String, String> getStagedFiles() {
+        return stagedFiles;
+    }
+
+    public HashMap<String, String> getRemovedFiles() {
+        return removedFiles;
+    }
 }
