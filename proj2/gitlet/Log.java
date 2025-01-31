@@ -1,4 +1,33 @@
 package gitlet;
 
+import java.text.SimpleDateFormat;
+
 public class Log {
+    public void execute() {
+        Commit CurrentCommit = MyUtils.getHeadCommit();
+
+        while (CurrentCommit != null) {
+            printCommit(CurrentCommit);
+
+            if (CurrentCommit.getParent() == null) {
+                break;
+            }
+            CurrentCommit = Utils.readObject(MyUtils.toCommitPath(CurrentCommit.getParent()), Commit.class);
+        }
+    }
+
+    private void printCommit(Commit commit) {
+        System.out.println("===");
+        System.out.println("Commit " + commit.getCommitID());
+
+        /** Ignoring the merge at this time.
+         * TODO
+         * */
+
+        SimpleDateFormat format = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z");
+        String formattedDate = format.format(commit.getTimestamp());
+        System.out.println("Date: " + formattedDate);
+        System.out.println(commit.getMessage());
+        System.out.println();
+    }
 }
