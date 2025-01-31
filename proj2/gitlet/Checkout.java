@@ -6,7 +6,7 @@ import static gitlet.MyUtils.*;
 
 public class Checkout {
 
-    public void checkoutFile(String fileName) {
+    public static void checkoutFile(String fileName) {
         Commit headCommit = getHeadCommit();
         String fileHash = headCommit.getFileHash(fileName);
         if (fileHash == null) {
@@ -17,7 +17,7 @@ public class Checkout {
         writeContents(new File(fileName), blob.getContent());
     }
 
-    public void checkoutFileFromCommit(String commitID, String fileName) {
+    public static void checkoutFileFromCommit(String commitID, String fileName) {
         File commitFile = toCommitPath(commitID);
         if (commitFile == null) {
             exit("No commit with that id exists.");
@@ -32,4 +32,8 @@ public class Checkout {
         Blobs blob = readObject(blobFile, Blobs.class);
         writeContents(new File(fileName), blob.getContent());
     }
+
+    /** Ignoring branches for now.
+     * TODO
+     * */
 }
