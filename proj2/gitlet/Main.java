@@ -26,7 +26,10 @@ public class Main {
                 checkValidity(args, 2);
                 Repository.add(args[1]);
                 break;
-            // TODO: FILL THE REST IN
+            case "commit":
+                checkInit();
+                checkValidity(args, 2);
+                Repository.commit(args[1]);
         }
     }
 }
