@@ -62,6 +62,12 @@ public class Staging implements Serializable {
         save();
     }
 
+    public void clear() {
+        stagedFiles.clear();
+        removedFiles.clear();
+        save();
+    }
+
     /** Save the staging area to disk. */
     private void save() {
         writeObject(STAGING_FILE, this);
@@ -73,5 +79,9 @@ public class Staging implements Serializable {
 
     public HashMap<String, String> getRemovedFiles() {
         return removedFiles;
+    }
+
+    public File getStagingFile() {
+        return STAGING_FILE;
     }
 }
