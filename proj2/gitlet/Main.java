@@ -30,6 +30,12 @@ public class Main {
                 checkInit();
                 checkValidity(args, 2);
                 Repository.commit(args[1]);
+                break;
+            case "rm":
+                checkInit();
+                checkValidity(args, 2);
+                Repository.rm(args[1]);
+                break;
         }
     }
 }
