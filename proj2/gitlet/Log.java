@@ -3,7 +3,7 @@ package gitlet;
 import java.text.SimpleDateFormat;
 
 public class Log {
-    public void execute() {
+    public static void execute() {
         Commit CurrentCommit = MyUtils.getHeadCommit();
 
         while (CurrentCommit != null) {
@@ -16,7 +16,7 @@ public class Log {
         }
     }
 
-    private void printCommit(Commit commit) {
+    private static void printCommit(Commit commit) {
         System.out.println("===");
         System.out.println("Commit " + commit.getCommitID());
 
