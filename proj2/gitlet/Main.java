@@ -36,6 +36,11 @@ public class Main {
                 checkValidity(args, 2);
                 Repository.rm(args[1]);
                 break;
+            case "log":
+                checkInit();
+                checkValidity(args, 1);
+                Repository.log();
+                break;
         }
     }
 }

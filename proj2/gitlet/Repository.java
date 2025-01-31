@@ -113,4 +113,8 @@ public class Repository {
         Staging sta = new Staging();
         sta.remove(f);
     }
+
+    public static void log() {
+        Log.execute();
+    }
 }
