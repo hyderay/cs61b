@@ -117,4 +117,12 @@ public class Repository {
     public static void log() {
         Log.execute();
     }
+
+    public static void checkout(String commitID, String fileName) {
+        if (commitID == null) {
+            Checkout.checkoutFile(fileName);
+        } else {
+            Checkout.checkoutFileFromCommit(commitID, fileName);
+        }
+    }
 }

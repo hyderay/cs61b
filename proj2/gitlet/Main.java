@@ -41,6 +41,12 @@ public class Main {
                 checkValidity(args, 1);
                 Repository.log();
                 break;
+            case "checkout":
+                checkInit();
+                handleCheckout(args);
+                break;
+            default:
+                exit("No command with that name exists.");
         }
     }
 }
