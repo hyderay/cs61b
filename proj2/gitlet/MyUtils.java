@@ -37,4 +37,15 @@ public class MyUtils {
         File commitFile = join(".gitlet", "commit", headCommitHash);
         return readObject(commitFile, Commit.class);
     }
+
+    /** Check whether the checkout command is valid. */
+    public static void handleCheckout(String[] args) {
+        if (args.length == 3 && args[1].equals("--")) {
+            Repository.checkout(null, args[2]);
+        } else if (args.length == 4 && args[2].equals("--")) {
+            Repository.checkout(args[1], args[3]);
+        } else {
+            exit("Incorrect operands.");
+        }
+    }
 }
