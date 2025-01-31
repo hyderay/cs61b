@@ -79,6 +79,7 @@ public class Commit implements Serializable {
         writeContents(headFile, commitID);
     }
 
+    /** Return the sha1 of the file as a string. */
     public String getFileHash(String name) {
         return blobFiles.getOrDefault(name, null);
     }
