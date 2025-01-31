@@ -24,6 +24,7 @@ import static gitlet.MyUtils.*;
  *
  *  @author Sean
  */
+
 public class Commit implements Serializable {
     /** The message of this Commit. */
     private String message;
@@ -44,13 +45,30 @@ public class Commit implements Serializable {
         blobFiles = new HashMap<>();
         generateCommitID();
         saveCommit();
+        updateHEAD();
     }
 
-    
+    /** Constructor for a new commit. */
+    public Commit(String message, String parent, HashMap<String, String> blobFiles) {
+        this.message = message;
+        this.parent = parent;
+        this.blobFiles = blobFiles;
+        this.timestamp = new Date();
+
+        generateCommitID();
+        saveCommit();
+        updateHEAD();
+    }
+
+    /** Update HEAD to point to the new commit. */
+    private void updateHEAD() {
+        File headFile = Repository.getHeadFile();
+        writeContents(headFile, commitID);
+    }
 
     /** Generate commit ID. */
     private void generateCommitID() {
-        commitID = sha1(message, timestamp.toString(), parent, blobFiles.toString());
+        this.commitID = sha1(message, timestamp.toString(), parent, blobFiles.toString());
     }
 
     /** Save the commit and update head. */
@@ -59,5 +77,29 @@ public class Commit implements Serializable {
         writeObject(commitFile, this);
         File headFile = Repository.getHeadFile();
         writeContents(headFile, commitID);
+    }
+
+    public String getFileHash(String name) {
+        return blobFiles.getOrDefault(name, null);
+    }
+
+    public String getCommitID() {
+        return commitID;
+    }
+
+    public String getParent() {
+        return parent;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public HashMap<String, String> getBlobFiles() {
+        return new HashMap<>(blobFiles);
     }
 }
