@@ -80,12 +80,13 @@ public class Repository {
         // Process staged files (avoid redundant blob creation)
         for (String fileName : staging.getStagedFiles().keySet()) {
             File file = new File(fileName);
-            String fileHash = sha1(readContentsAsString(file));
+            Blobs blob = new Blobs(file);
+            String fileHash = blob.getID(); // Use the generated hash from Blobs
 
             // Only create a new blob if the file is actually different
-            if (!fileHash.equals(parentCommit.getFileHash(fileName))) {
-                Blobs blob = new Blobs(file);
-                newBlobFiles.put(fileName, blob.getID());
+            if (!fileHash.equals(parentCommit.getFileHash(fileName)) || parentCommit.getFileHash(fileName) == null) {
+                Blobs blob2 = new Blobs(file);
+                newBlobFiles.put(fileName, blob2.getID());
             }
         }
 
