@@ -79,8 +79,6 @@ public class Commit implements Serializable {
     private void saveCommit() {
         File commitFile = toCommitPath(commitID);
         writeObject(commitFile, this);
-        File headFile = Repository.getHeadFile();
-        writeContents(headFile, commitID);
     }
 
     /** Return the sha1 of the file as a string. */
