@@ -68,7 +68,11 @@ public class Commit implements Serializable {
 
     /** Generate commit ID. */
     private void generateCommitID() {
-        this.commitID = sha1(message, timestamp.toString(), parent, blobFiles.toString());
+        String parentID = parent;
+        if (parent == null) {
+            parentID = "";
+        }
+        this.commitID = sha1(message, timestamp.toString(), parentID, serialize(blobFiles));
     }
 
     /** Save the commit and update head. */
