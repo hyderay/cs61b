@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 public class Log {
     public static void execute() {
@@ -18,7 +19,7 @@ public class Log {
 
     private static void printCommit(Commit commit) {
         System.out.println("===");
-        System.out.println("Commit " + commit.getCommitID());
+        System.out.println("commit " + commit.getCommitID());
 
         /** Ignoring the merge at this time.
          * TODO
