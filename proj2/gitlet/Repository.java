@@ -81,7 +81,7 @@ public class Repository {
             String fileHash = blob.getID(); // Use the generated hash from Blobs
 
             // Only create a new blob if the file is actually different
-            if (!fileHash.equals(parentCommit.getFileHash(fileName)) || parentCommit.getFileHash(fileName) == null) {
+            if (!fileHash.equals(parentCommit.getFileHash(fileName))) {
                 Blobs blob2 = new Blobs(file);
                 newBlobFiles.put(fileName, blob2.getID());
             }
