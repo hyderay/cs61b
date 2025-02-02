@@ -83,8 +83,8 @@ public class RedBlackTree<T extends Comparable<T>> {
      */
     RBTreeNode<T> rotateLeft(RBTreeNode<T> node) {
         RBTreeNode<T> right = node.right;
-        right.left = node;
         node.right = right.left;
+        right.left = node;
 
         boolean tempColor = node.isBlack;
         node.isBlack = right.isBlack;
@@ -123,7 +123,7 @@ public class RedBlackTree<T extends Comparable<T>> {
     private RBTreeNode<T> insert(RBTreeNode<T> node, T item) {
 
         if (node == null) {
-            return new RBTreeNode(false, item);
+            return new RBTreeNode<>(false, item);
         }
 
         int cmp = item.compareTo(node.item);
