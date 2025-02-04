@@ -45,6 +45,11 @@ public class Main {
                 checkInit();
                 handleCheckout(args);
                 break;
+            case "branch":
+                checkInit();
+                checkValidity(args, 2);
+                Repository.createBranch(args[1]);
+                break;
             default:
                 exit("No command with that name exists.");
         }

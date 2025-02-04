@@ -123,4 +123,12 @@ public class Repository {
             Checkout.checkoutFileFromCommit(commitID, fileName);
         }
     }
+
+    public static File getRefsDir() {
+        return REFS_DIR;
+    }
+
+    public static void createBranch(String name) {
+        Branch.createBranch(name);
+    }
 }
