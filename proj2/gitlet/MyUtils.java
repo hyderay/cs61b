@@ -48,4 +48,9 @@ public class MyUtils {
             exit("Incorrect operands.");
         }
     }
+
+    /** Get the branch file from .gitlet/refs. */
+    public static File getBranchFile(String branchName) {
+        return join(Repository.getRefsDir(), branchName);
+    }
 }
