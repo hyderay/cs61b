@@ -131,4 +131,8 @@ public class Repository {
     public static void createBranch(String name) {
         Branch.createBranch(name);
     }
+
+    public static void status() {
+        Log.status();
+    }
 }

@@ -50,6 +50,11 @@ public class Main {
                 checkValidity(args, 2);
                 Repository.createBranch(args[1]);
                 break;
+            case "status":
+                checkInit();
+                checkValidity(args, 1);
+                Repository.status();
+                break;
             default:
                 exit("No command with that name exists.");
         }
