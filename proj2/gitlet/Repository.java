@@ -114,11 +114,17 @@ public class Repository {
         Log.execute();
     }
 
-    public static void checkout(String commitID, String fileName) {
-        if (commitID == null) {
-            Checkout.checkoutFile(fileName);
-        } else {
-            Checkout.checkoutFileFromCommit(commitID, fileName);
+    public static void checkout(String commitID, String fileName, String branchName, int index) {
+        switch(index) {
+            case 1:
+                Checkout.checkoutFile(fileName);
+                break;
+            case 2:
+                Checkout.checkoutFileFromCommit(commitID, fileName);
+                break;
+            case 3:
+                Checkout.checkoutBranch(branchName);
+                break;
         }
     }
 

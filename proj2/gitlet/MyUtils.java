@@ -41,9 +41,11 @@ public class MyUtils {
     /** Check whether the checkout command is valid. */
     public static void handleCheckout(String[] args) {
         if (args.length == 3 && args[1].equals("--")) {
-            Repository.checkout(null, args[2]);
+            Repository.checkout(null, args[2], null, 1);
         } else if (args.length == 4 && args[2].equals("--")) {
-            Repository.checkout(args[1], args[3]);
+            Repository.checkout(args[1], args[3], null, 2);
+        } else if (args.length == 2) {
+            Repository.checkout(null, null, args[1], 3);
         } else {
             exit("Incorrect operands.");
         }
