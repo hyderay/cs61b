@@ -143,4 +143,8 @@ public class Repository {
     public static void rmBranch(String name) {
         Branch.removeBranch(name);
     }
+
+    public static void reset(String commitID) {
+        Checkout.reset(commitID);
+    }
 }

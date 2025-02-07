@@ -46,22 +46,48 @@ public class Checkout {
             exit("No need to checkout the current branch.");
         }
         Commit newCommit = readObject(toCommitPath(commitID), Commit.class);
+
+        untrackedFile(currentCommit, newCommit);
+
+        checkoutCommit(currentCommit, newCommit);
+
+        writeContents(Repository.getHeadFile(), commitID);
+        Staging staging = new Staging();
+        staging.clear();
+    }
+
+    private static void untrackedFile(Commit currentCommit, Commit newCommit) {
         List<String> cwdFiles = plainFilenamesIn(Repository.CWD);
         for (String file : cwdFiles) {
             if (!currentCommit.getBlobFiles().containsKey(file) && newCommit.getBlobFiles().containsKey(file)) {
                 exit("There is an untracked file in the way; delete it, or add and commit it first.");
             }
         }
+    }
+
+    private static void checkoutCommit(Commit currentCommit, Commit newCommit) {
         for (String file : newCommit.getBlobFiles().keySet()) {
             File blobFile = join(Repository.getObjectsDir(), newCommit.getBlobFiles().get(file));
             Blobs blob = readObject(blobFile, Blobs.class);
             writeContents(new File(file), blob.getContent());
         }
+
         for (String file : currentCommit.getBlobFiles().keySet()) {
             if (!newCommit.getBlobFiles().containsKey(file)) {
                 restrictedDelete(new File(file));
             }
         }
+    }
+
+    public static void reset(String commitID) {
+        File commitFile = toCommitPath(commitID);
+        if (!commitFile.exists()) {
+            exit("No commit with that id exists.");
+        }
+        Commit targetCommit = readObject(commitFile, Commit.class);
+        Commit currentCommit = getHeadCommit();
+        untrackedFile(currentCommit, targetCommit);
+        checkoutCommit(currentCommit, targetCommit);
         writeContents(Repository.getHeadFile(), commitID);
         Staging staging = new Staging();
         staging.clear();
