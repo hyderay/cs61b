@@ -18,4 +18,19 @@ public class Branch implements Serializable {
 
         writeContents(branchFile, headCommitID);
     }
+
+    public static void removeBranch(String branchName) {
+        File branchFile = getBranchFile(branchName);
+
+        if (!branchFile.exists()) {
+            exit("A branch with that name does not exist.");
+        }
+
+        String headCommitID = readContentsAsString(Repository.getHeadFile());
+        if (headCommitID.equals(readContentsAsString(branchFile))) {
+            exit("Cannot remove the current branch.");
+        }
+
+        restrictedDelete(branchFile);
+    }
 }

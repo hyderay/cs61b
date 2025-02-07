@@ -55,6 +55,11 @@ public class Main {
                 checkValidity(args, 1);
                 Repository.status();
                 break;
+            case "rm-branch":
+                checkInit();
+                checkValidity(args, 2);
+                Repository.rmBranch(args[1]);
+                break;
             default:
                 exit("No command with that name exists.");
         }

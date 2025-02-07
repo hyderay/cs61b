@@ -139,4 +139,8 @@ public class Repository {
     public static void status() {
         Log.status();
     }
+
+    public static void rmBranch(String name) {
+        Branch.removeBranch(name);
+    }
 }
