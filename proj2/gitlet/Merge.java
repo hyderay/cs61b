@@ -80,7 +80,7 @@ public class Merge {
 
         String splitPointCommitID = splitPointCommit.getCommitID();
         if (!splitPointCommitID.equals(headCommitID) || !splitPointCommitID.equals(givenCommitID)) {
-            commitMerge(headCommitID, branchName, headCommitID);
+            commitMerge(headCommitID, givenCommitID, branchName);
         }
 
         if (hasConflicts) {
@@ -122,23 +122,24 @@ public class Merge {
         sta.add(new File(file));
     }
 
-    private static void commitMerge(String commitID, String branchName, String headCommitID) {
+    private static void commitMerge(String headCommitID, String givenCommitID, String branchName) {
         Staging stagingArea = new Staging();
-        Commit headCommit = readObject(toCommitPath(commitID), Commit.class);
+        Commit headCommit = Utils.readObject(MyUtils.toCommitPath(headCommitID), Commit.class);
         HashMap<String, String> blobFile = new HashMap<>(headCommit.getBlobFiles());
 
+        // Process staged and removed files as before.
         for (String fileName : stagingArea.getStagedFiles().keySet()) {
             File file = new File(fileName);
             Blobs blob = new Blobs(file);
             blobFile.put(fileName, blob.getID());
         }
-
         for (String fileName : stagingArea.getRemovedFiles().keySet()) {
             blobFile.remove(fileName);
         }
 
         String message = "Merged " + branchName + " into " + getCurrentBranchName() + ".";
-        new Commit(message, headCommitID, blobFile);
+        // Create merge commit with both parents.
+        new Commit(message, headCommitID, givenCommitID, blobFile);
         stagingArea.clear();
     }
 }

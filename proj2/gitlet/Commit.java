@@ -36,6 +36,7 @@ public class Commit implements Serializable {
     private HashMap<String, String> blobFiles;
     /** Current commit ID. */
     private String commitID;
+    private String secondParent;
 
     /** Constructor for initial commit. */
     public Commit() {
@@ -43,6 +44,7 @@ public class Commit implements Serializable {
         timestamp = new Date(0);
         parent = null;
         blobFiles = new HashMap<>();
+        secondParent = null;
         generateCommitID();
         saveCommit();
         updateHEAD();
@@ -54,7 +56,21 @@ public class Commit implements Serializable {
         this.parent = parent;
         this.blobFiles = blobFiles;
         this.timestamp = new Date();
+        this.secondParent = null;
 
+        generateCommitID();
+        saveCommit();
+        updateHEAD();
+    }
+
+    /** Constructor for a merge commit. */
+    public Commit(String message, String parent,
+                  String secondParent, HashMap<String, String> blobFiles) {
+        this.message = message;
+        this.parent = parent;
+        this.secondParent = secondParent;
+        this.blobFiles = blobFiles;
+        this.timestamp = new Date();
         generateCommitID();
         saveCommit();
         updateHEAD();
@@ -77,11 +93,21 @@ public class Commit implements Serializable {
 
     /** Generate commit ID. */
     private void generateCommitID() {
-        String parentID = parent;
+        String parentID;
         if (parent == null) {
             parentID = "";
+        } else {
+            parentID = parent;
         }
-        this.commitID = sha1(message, timestamp.toString(), parentID);
+
+        String mergePart;
+        if (secondParent == null) {
+            mergePart = "";
+        } else {
+            mergePart = secondParent;
+        }
+
+        this.commitID = sha1(message, timestamp.toString(), parentID, mergePart);
     }
 
     /** Save the commit. */
@@ -113,5 +139,9 @@ public class Commit implements Serializable {
 
     public HashMap<String, String> getBlobFiles() {
         return new HashMap<>(blobFiles);
+    }
+
+    public String getSecondParent() {
+        return secondParent;
     }
 }

@@ -25,15 +25,10 @@ public class Log {
         System.out.println("===");
         System.out.println("commit " + commit.getCommitID());
 
-        if (commit.getMessage().startsWith("Merged ")) {
-            String[] words = commit.getMessage().split(" ");
-            String firstParentID = commit.getParent();
-            String secondParentName = words[1];
-            File secondParent = getBranchFile(secondParentName);
-            String secondParentID = readContentsAsString(secondParent);
-            firstParentID = firstParentID.substring(0, 7);
-            secondParentID = secondParentID.substring(0, 7);
-            System.out.println("Merge: " + firstParentID + " " + secondParentID);
+        if (commit.getSecondParent() != null) {
+            String firstParentAbbrev = commit.getParent().substring(0, 7);
+            String secondParentAbbrev = commit.getSecondParent().substring(0, 7);
+            System.out.println("Merge: " + firstParentAbbrev + " " + secondParentAbbrev);
         }
 
         SimpleDateFormat format = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z");
@@ -47,20 +42,28 @@ public class Log {
 
         /** Print branches. */
         System.out.println("=== Branches ===");
-        // Instead of listing all entries in .gitlet/refs,
-        // list only the branch files in .gitlet/refs/heads.
+        // Read the HEAD file to determine the current branch reference.
+        String headRef = readContentsAsString(Repository.getHeadFile());
+        // If HEAD is attached, extract the branch name by removing the "refs/heads/" prefix.
+        String currentBranch;
+        if (headRef.startsWith("refs/heads/")) {
+            currentBranch = headRef.substring("refs/heads/".length());
+        } else {
+            currentBranch = null;
+        }
+        // List only branch files from .gitlet/refs/heads.
         File headsDir = Utils.join(Repository.getRefsDir(), "heads");
-        File[] branches = headsDir.listFiles(); // Only files here are valid branch references
-        String headBranch = Utils.readContentsAsString(Repository.getHeadFile());
+        File[] branches = headsDir.listFiles();
 
         for (File branch : branches) {
-            String branchContent = Utils.readContentsAsString(branch);
-            if (branchContent.equals(headBranch)) {
+            // Compare the branch file name with the current branch name.
+            if (branch.getName().equals(currentBranch)) {
                 System.out.println("*" + branch.getName());
             } else {
                 System.out.println(branch.getName());
             }
         }
+
         System.out.println();
 
         /** Print staged files. */

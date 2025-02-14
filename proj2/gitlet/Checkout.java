@@ -21,7 +21,7 @@ public class Checkout {
 
     public static void checkoutFileFromCommit(String commitID, String fileName) {
         File commitFile = toCommitPath(commitID);
-        if (commitFile == null) {
+        if (!commitFile.exists()) {   // Check if the file actually exists on disk
             exit("No commit with that id exists.");
         }
 
