@@ -85,7 +85,7 @@ public class Repository {
         }
 
         // Create new commit
-        Commit newCommit = new Commit(message, parentCommit.getCommitID(), newBlobFiles);
+        new Commit(message, parentCommit.getCommitID(), newBlobFiles);
 
         staging.clear();
     }
@@ -140,5 +140,9 @@ public class Repository {
 
     public static void reset(String commitID) {
         Checkout.reset(commitID);
+    }
+
+    public static void merge(String branchName) {
+        Merge.merge(branchName);
     }
 }

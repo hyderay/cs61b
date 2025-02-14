@@ -65,6 +65,11 @@ public class Main {
                 checkValidity(args, 2);
                 Repository.reset(args[1]);
                 break;
+            case "merge":
+                checkInit();
+                checkValidity(args, 2);
+                Repository.merge(args[1]);
+                break;
             default:
                 exit("No command with that name exists.");
         }
