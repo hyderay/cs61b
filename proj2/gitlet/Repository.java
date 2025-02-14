@@ -195,7 +195,7 @@ public class Repository {
         if (isHeadDetached()) {
             return headContent; // Direct commit ID
         } else {
-            File branchFile = new File(GITLET_DIR, headContent);
+            File branchFile = new File(REFS_DIR, headContent);
             return readContentsAsString(branchFile);
         }
     }
