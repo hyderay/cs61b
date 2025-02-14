@@ -50,7 +50,8 @@ public class Repository {
         // Create the initial commit.
         Commit initialCommit = new Commit();
         // (The Commit constructor already saves the commit and updates HEAD.)
-
+        File masterBranch = join(REFS_DIR, "master");
+        writeContents(masterBranch, initialCommit.getCommitID());
         // Initialize the staging area.
         Staging staging = new Staging();
         writeObject(staging.getStagingFile(), staging);
