@@ -63,7 +63,16 @@ public class Commit implements Serializable {
     /** Update HEAD to point to the new commit. */
     private void updateHEAD() {
         File headFile = Repository.getHeadFile();
-        writeContents(headFile, commitID);
+        String headContent = readContentsAsString(headFile);
+
+        if (Repository.isHeadDetached()) {
+            // If HEAD is detached, store commit ID directly
+            writeContents(headFile, commitID);
+        } else {
+            // If HEAD points to a branch, update that branch reference
+            File branchFile = new File(Repository.GITLET_DIR, headContent);
+            writeContents(branchFile, commitID);
+        }
     }
 
     /** Generate commit ID. */

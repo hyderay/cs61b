@@ -40,18 +40,19 @@ public class Checkout {
         if (!branchFile.exists()) {
             exit("No such branch exists.");
         }
-        Commit currentCommit = getHeadCommit();
-        String commitID = readContentsAsString(branchFile);
-        if (commitID.equals(currentCommit.getCommitID())) {
+        String currentHead = Repository.getHeadCommitID();
+        String newCommitID = readContentsAsString(branchFile);
+        if (newCommitID.equals(currentHead)) {
             exit("No need to checkout the current branch.");
         }
-        Commit newCommit = readObject(toCommitPath(commitID), Commit.class);
+        Commit newCommit = readObject(toCommitPath(newCommitID), Commit.class);
+        Commit currentCommit = getHeadCommit();
 
         untrackedFile(currentCommit, newCommit);
-
         checkoutCommit(currentCommit, newCommit);
 
-        writeContents(Repository.getHeadFile(), commitID);
+        writeContents(Repository.getHeadFile(), "refs/heads/" + branchName);
+
         Staging staging = new Staging();
         staging.clear();
     }
@@ -89,9 +90,12 @@ public class Checkout {
         }
         Commit targetCommit = readObject(commitFile, Commit.class);
         Commit currentCommit = getHeadCommit();
+
         untrackedFile(currentCommit, targetCommit);
         checkoutCommit(currentCommit, targetCommit);
+
         writeContents(Repository.getHeadFile(), commitID);
+
         Staging staging = new Staging();
         staging.clear();
     }

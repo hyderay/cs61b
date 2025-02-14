@@ -32,9 +32,8 @@ public class MyUtils {
 
     /** Return the head as a Commit Object. */
     public static Commit getHeadCommit() {
-        File headFile = join(".gitlet", "HEAD");
-        String headCommitHash = readContentsAsString(headFile);
-        File commitFile = join(".gitlet", "commit", headCommitHash);
+        String headCommitID = Repository.getHeadCommitID();
+        File commitFile = join(".gitlet", "commit", headCommitID);
         return readObject(commitFile, Commit.class);
     }
 
@@ -53,6 +52,6 @@ public class MyUtils {
 
     /** Get the branch file from .gitlet/refs. */
     public static File getBranchFile(String branchName) {
-        return join(Repository.getRefsDir(), branchName);
+        return Utils.join(Repository.getRefsDir(), "heads", branchName);
     }
 }
