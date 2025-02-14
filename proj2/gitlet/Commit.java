@@ -75,7 +75,7 @@ public class Commit implements Serializable {
         this.commitID = sha1(message, timestamp.toString(), parentID);
     }
 
-    /** Save the commit and update head. */
+    /** Save the commit. */
     private void saveCommit() {
         File commitFile = toCommitPath(commitID);
         writeObject(commitFile, this);
