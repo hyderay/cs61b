@@ -33,14 +33,15 @@ public class Staging implements Serializable {
         }
         String content = readContentsAsString(f);
         String fileHash = sha1(content);
-
         Commit head = getHeadCommit();
 
-        /** If file is unchanged compared to the head commit, remove from staging area. */
+        // If the file is unchanged compared to the head commit, remove it from staging.
         if (head.getFileHash(f.getName()) != null
                 && fileHash.equals(head.getFileHash(f.getName()))) {
             stagedFiles.remove(f.getName());
         } else {
+            // Create and save the blob immediately.
+            new Blobs(f);
             stagedFiles.put(f.getName(), fileHash);
         }
 

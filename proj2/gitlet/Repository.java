@@ -41,18 +41,23 @@ public class Repository {
         }
         GITLET_DIR.mkdir();
         REFS_DIR.mkdir();
+
+        File headsDir = Utils.join(REFS_DIR, "heads");
+        headsDir.mkdir();
+
         OBJECTS_DIR.mkdir();
         COMMIT_DIR.mkdir();
 
-        // Initialize the initial commit
-        Commit initialCommit = new Commit();
-        writeObject(join(COMMIT_DIR, initialCommit.getCommitID()), initialCommit);
+        // Initialize HEAD file with the default branch reference.
+        writeContents(HEAD_FILE, "refs/heads/master");
 
-        // Initialize empty staging area
+        // Create the initial commit.
+        Commit initialCommit = new Commit();
+        // (The Commit constructor already saves the commit and updates HEAD.)
+
+        // Initialize the staging area.
         Staging staging = new Staging();
         writeObject(staging.getStagingFile(), staging);
-
-        Branch.createBranch("master");
     }
 
     public static void add(String fileName) {
@@ -75,20 +80,28 @@ public class Repository {
         Commit parentCommit = getHeadCommit();
         HashMap<String, String> newBlobFiles = new HashMap<>(parentCommit.getBlobFiles());
 
-        // Process staged files (avoid redundant blob creation)
+        // Instead of re-reading the file, use the hash saved when the file was staged.
         for (String fileName : staging.getStagedFiles().keySet()) {
-            File file = new File(fileName);
-            Blobs blob = new Blobs(file);
-            newBlobFiles.put(fileName, blob.getID());
+            newBlobFiles.put(fileName, staging.getStagedFiles().get(fileName));
         }
 
-        // Process removed files
+        // Remove files that were staged for removal.
         for (String fileName : staging.getRemovedFiles().keySet()) {
-            newBlobFiles.remove(fileName); // Remove file from commit if staged for deletion
+            newBlobFiles.remove(fileName);
         }
 
-        // Create new commit
-        new Commit(message, parentCommit.getCommitID(), newBlobFiles);
+        // Create the new commit with the blob files map.
+        Commit newCommit = new Commit(message, parentCommit.getCommitID(), newBlobFiles);
+        String newCommitID = newCommit.getCommitID();
+
+        if (!Repository.isHeadDetached()) {
+            // If HEAD is on a branch, update that branch reference.
+            String headBranch = readContentsAsString(Repository.getHeadFile());
+            writeContents(new File(GITLET_DIR, headBranch), newCommitID);
+        } else {
+            // If HEAD is detached, update HEAD directly.
+            writeContents(Repository.getHeadFile(), newCommitID);
+        }
 
         staging.clear();
     }
@@ -172,6 +185,21 @@ public class Repository {
 
         if (!isFound) {
             System.out.println("Found no commit with that message.");
+        }
+    }
+
+    public static boolean isHeadDetached() {
+        String headContent = readContentsAsString(HEAD_FILE);
+        return !headContent.startsWith("refs/heads/");
+    }
+
+    public static String getHeadCommitID() {
+        String headContent = readContentsAsString(HEAD_FILE);
+        if (isHeadDetached()) {
+            return headContent; // Direct commit ID
+        } else {
+            File branchFile = new File(GITLET_DIR, headContent);
+            return readContentsAsString(branchFile);
         }
     }
 }
