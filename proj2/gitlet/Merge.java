@@ -141,17 +141,4 @@ public class Merge {
         new Commit(message, headCommitID, blobFile);
         stagingArea.clear();
     }
-
-    private static String getCurrentBranchName() {
-        File[] branches = Repository.getRefsDir().listFiles();
-        String headBranch = readContentsAsString(Repository.getHeadFile());
-
-        for (File branch : branches) {
-            String branchContent = readContentsAsString(branch);
-            if (branchContent.equals(headBranch)) {
-                return branch.getName();
-            }
-        }
-        return null;
-    }
 }

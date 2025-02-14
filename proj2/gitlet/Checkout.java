@@ -42,6 +42,7 @@ public class Checkout {
         }
         Commit currentCommit = getHeadCommit();
         String commitID = readContentsAsString(branchFile);
+
         if (commitID.equals(currentCommit.getCommitID())) {
             exit("No need to checkout the current branch.");
         }
@@ -51,7 +52,9 @@ public class Checkout {
 
         checkoutCommit(currentCommit, newCommit);
 
-        writeContents(Repository.getHeadFile(), commitID);
+
+        writeContents(Repository.getHeadFile(), "refs/" + branchName);
+        
         Staging staging = new Staging();
         staging.clear();
     }

@@ -48,10 +48,11 @@ public class Log {
         /** Print branches. */
         System.out.println("=== Branches ===");
         File[] branches = Repository.getRefsDir().listFiles();
-        String headBranch = readContentsAsString(Repository.getHeadFile());
+        String headContent = readContentsAsString(Repository.getHeadFile());
+
         for (File branch : branches) {
-            String branchContent = readContentsAsString(branch);
-            if (branchContent.equals(headBranch)) {
+            if (("refs/" + branch.getName()).equals(headContent)
+                    || branch.getName().equals(headContent)) {
                 System.out.println("*" + branch.getName());
             } else {
                 System.out.println(branch.getName());

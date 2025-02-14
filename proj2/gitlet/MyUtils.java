@@ -55,4 +55,17 @@ public class MyUtils {
     public static File getBranchFile(String branchName) {
         return join(Repository.getRefsDir(), branchName);
     }
+
+    public static String getCurrentBranchName() {
+        File[] branches = Repository.getRefsDir().listFiles();
+        String headBranch = readContentsAsString(Repository.getHeadFile());
+
+        for (File branch : branches) {
+            String branchContent = readContentsAsString(branch);
+            if (branchContent.equals(headBranch)) {
+                return branch.getName();
+            }
+        }
+        return null;
+    }
 }

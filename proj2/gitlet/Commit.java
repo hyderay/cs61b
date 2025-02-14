@@ -63,7 +63,12 @@ public class Commit implements Serializable {
     /** Update HEAD to point to the new commit. */
     private void updateHEAD() {
         File headFile = Repository.getHeadFile();
-        writeContents(headFile, commitID);
+        String currentBranch = getCurrentBranchName();
+        if (currentBranch != null) {
+            writeContents(headFile, "refs/" + currentBranch);  // Store branch reference
+        } else {
+            writeContents(headFile, commitID);  // Fallback to commit ID if no branch found
+        }
     }
 
     /** Generate commit ID. */
