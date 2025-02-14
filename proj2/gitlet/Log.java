@@ -47,12 +47,15 @@ public class Log {
 
         /** Print branches. */
         System.out.println("=== Branches ===");
-        File[] branches = Repository.getRefsDir().listFiles();
-        String headContent = readContentsAsString(Repository.getHeadFile());
+        // Instead of listing all entries in .gitlet/refs,
+        // list only the branch files in .gitlet/refs/heads.
+        File headsDir = Utils.join(Repository.getRefsDir(), "heads");
+        File[] branches = headsDir.listFiles(); // Only files here are valid branch references
+        String headBranch = Utils.readContentsAsString(Repository.getHeadFile());
 
         for (File branch : branches) {
-            if (("refs/" + branch.getName()).equals(headContent)
-                    || branch.getName().equals(headContent)) {
+            String branchContent = Utils.readContentsAsString(branch);
+            if (branchContent.equals(headBranch)) {
                 System.out.println("*" + branch.getName());
             } else {
                 System.out.println(branch.getName());
