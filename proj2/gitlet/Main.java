@@ -46,6 +46,16 @@ public class Main {
                 checkValidity(args, 1);
                 Repository.global_log();
                 break;
+            case "find":
+                checkInit();
+                checkValidity(args, 2);
+                Repository.find(args[1]);
+                break;
+            case "status":
+                checkInit();
+                checkValidity(args, 1);
+                Repository.status();
+                break;
             case "checkout":
                 checkInit();
                 handleCheckout(args);
@@ -54,11 +64,6 @@ public class Main {
                 checkInit();
                 checkValidity(args, 2);
                 Repository.createBranch(args[1]);
-                break;
-            case "status":
-                checkInit();
-                checkValidity(args, 1);
-                Repository.status();
                 break;
             case "rm-branch":
                 checkInit();

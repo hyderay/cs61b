@@ -2,6 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 
 import static gitlet.MyUtils.*;
 import static gitlet.Utils.*;
@@ -152,5 +153,22 @@ public class Repository {
 
     public static void global_log() {
         Log.global_log();
+    }
+
+    public static void find(String commitMessage) {
+        List<String> allCommits = plainFilenamesIn(Repository.getCommitDir());
+        boolean isFound = false;
+
+        for (String commitID : allCommits) {
+            Commit commit = readObject(toCommitPath(commitID), Commit.class);
+            if (commit.getMessage().equals(commitMessage)) {
+                System.out.println(commitID);
+                isFound = true;
+            }
+        }
+
+        if (!isFound) {
+            System.out.println("Found no commit with that message.");
+        }
     }
 }
