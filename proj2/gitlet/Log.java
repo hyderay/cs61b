@@ -25,9 +25,14 @@ public class Log {
         System.out.println("===");
         System.out.println("commit " + commit.getCommitID());
 
-        /** Ignoring the merge at this time.
-         * TODO
-         * */
+        if (commit.getMessage().startsWith("Merged ")) {
+            String[] words = commit.getMessage().split(" ");
+            String firstParentID = commit.getParent();
+            String secondParentName = words[1];
+            File secondParent = getBranchFile(secondParentName);
+            String secondParentID = readContentsAsString(secondParent);
+            System.out.println("Merge: " + firstParentID.substring(0, 7) + " " + secondParentID.substring(0, 7));
+        }
 
         SimpleDateFormat format = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z");
         String formattedDate = format.format(commit.getTimestamp());
