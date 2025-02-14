@@ -100,4 +100,12 @@ public class Log {
         }
         System.out.println();
     }
+
+    public static void global_log() {
+        List<String> allCommits = plainFilenamesIn(Repository.getCommitDir());
+        for (String commitID : allCommits) {
+            Commit commit = readObject(join(Repository.getCommitDir(), commitID), Commit.class);
+            printCommit(commit);
+        }
+    }
 }

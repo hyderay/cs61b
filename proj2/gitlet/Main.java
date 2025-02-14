@@ -41,6 +41,11 @@ public class Main {
                 checkValidity(args, 1);
                 Repository.log();
                 break;
+            case "global-log":
+                checkInit();
+                checkValidity(args, 1);
+                Repository.global_log();
+                break;
             case "checkout":
                 checkInit();
                 handleCheckout(args);

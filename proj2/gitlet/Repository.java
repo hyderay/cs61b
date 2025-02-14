@@ -145,4 +145,12 @@ public class Repository {
     public static void merge(String branchName) {
         Merge.merge(branchName);
     }
+
+    public static File getCommitDir() {
+        return COMMIT_DIR;
+    }
+
+    public static void global_log() {
+        Log.global_log();
+    }
 }
