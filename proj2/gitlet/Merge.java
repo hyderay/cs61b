@@ -100,7 +100,8 @@ public class Merge {
                 if (givenReplicate.getParent() == null) {
                     givenReplicate = null;
                 } else {
-                    givenReplicate = readObject(toCommitPath(givenReplicate.getParent()), Commit.class);
+                    File file = toCommitPath(givenReplicate.getParent());
+                    givenReplicate = readObject(file, Commit.class);
                 }
             }
             if (current.getParent() == null) {
@@ -112,9 +113,10 @@ public class Merge {
         return null;
     }
 
-    private static void handleConflicts(String file, HashMap<String, String> current, HashMap<String, String> given) {
-        String content = "<<<<<<< HEAD\n" + current.getOrDefault(file, "") +
-                "\n=======\n" + given.getOrDefault(file, "") + "\n>>>>>>\n";
+    private static void handleConflicts(String file, HashMap<String, String> current,
+                                        HashMap<String, String> given) {
+        String content = "<<<<<<< HEAD\n" + current.getOrDefault(file, "")
+                + "\n=======\n" + given.getOrDefault(file, "") + "\n>>>>>>\n";
         writeContents(new File(file), content);
         Staging sta = new Staging();
         sta.add(new File(file));

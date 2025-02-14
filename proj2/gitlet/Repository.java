@@ -110,7 +110,7 @@ public class Repository {
     }
 
     public static void checkout(String commitID, String fileName, String branchName, int index) {
-        switch(index) {
+        switch (index) {
             case 1:
                 Checkout.checkoutFile(fileName);
                 break;
@@ -120,6 +120,7 @@ public class Repository {
             case 3:
                 Checkout.checkoutBranch(branchName);
                 break;
+            default:
         }
     }
 
@@ -151,8 +152,8 @@ public class Repository {
         return COMMIT_DIR;
     }
 
-    public static void global_log() {
-        Log.global_log();
+    public static void globalLog() {
+        Log.globalLog();
     }
 
     public static void find(String commitMessage) {

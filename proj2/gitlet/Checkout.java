@@ -59,7 +59,9 @@ public class Checkout {
     private static void untrackedFile(Commit currentCommit, Commit newCommit) {
         List<String> cwdFiles = plainFilenamesIn(Repository.CWD);
         for (String file : cwdFiles) {
-            if (!currentCommit.getBlobFiles().containsKey(file) && newCommit.getBlobFiles().containsKey(file)) {
+            boolean currentContain = currentCommit.getBlobFiles().containsKey(file);
+            boolean newContain = newCommit.getBlobFiles().containsKey(file);
+            if (!currentContain && newContain) {
                 exit("There is an untracked file in the way; delete it, or add and commit it first.");
             }
         }

@@ -9,15 +9,15 @@ import static gitlet.Utils.*;
 
 public class Log {
     public static void execute() {
-        Commit CurrentCommit = MyUtils.getHeadCommit();
+        Commit currentCommit = MyUtils.getHeadCommit();
 
-        while (CurrentCommit != null) {
-            printCommit(CurrentCommit);
+        while (currentCommit != null) {
+            printCommit(currentCommit);
 
-            if (CurrentCommit.getParent() == null) {
+            if (currentCommit.getParent() == null) {
                 break;
             }
-            CurrentCommit = Utils.readObject(MyUtils.toCommitPath(CurrentCommit.getParent()), Commit.class);
+            currentCommit = readObject(toCommitPath(currentCommit.getParent()), Commit.class);
         }
     }
 
@@ -31,7 +31,9 @@ public class Log {
             String secondParentName = words[1];
             File secondParent = getBranchFile(secondParentName);
             String secondParentID = readContentsAsString(secondParent);
-            System.out.println("Merge: " + firstParentID.substring(0, 7) + " " + secondParentID.substring(0, 7));
+            firstParentID = firstParentID.substring(0, 7);
+            secondParentID = secondParentID.substring(0, 7);
+            System.out.println("Merge: " + firstParentID + " " + secondParentID);
         }
 
         SimpleDateFormat format = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z");
@@ -94,14 +96,16 @@ public class Log {
         System.out.println("=== Untracked Files ===");
         List<String> cwdFiles = plainFilenamesIn(Repository.CWD);
         for (String file : cwdFiles) {
-            if (!stagingArea.getStagedFiles().containsKey(file) && headCommit.getFileHash(file) == null) {
+            boolean staContain = stagingArea.getStagedFiles().containsKey(file);
+            boolean headContain = headCommit.getFileHash(file) == null;
+            if (!staContain && headContain) {
                 System.out.println(file);
             }
         }
         System.out.println();
     }
 
-    public static void global_log() {
+    public static void globalLog() {
         List<String> allCommits = plainFilenamesIn(Repository.getCommitDir());
         for (String commitID : allCommits) {
             Commit commit = readObject(join(Repository.getCommitDir(), commitID), Commit.class);

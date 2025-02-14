@@ -16,7 +16,7 @@ public class Main {
         }
 
         String firstArg = args[0];
-        switch(firstArg) {
+        switch (firstArg) {
             case "init":
                 checkValidity(args, 1);
                 Repository.init();
@@ -44,7 +44,7 @@ public class Main {
             case "global-log":
                 checkInit();
                 checkValidity(args, 1);
-                Repository.global_log();
+                Repository.globalLog();
                 break;
             case "find":
                 checkInit();

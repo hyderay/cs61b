@@ -11,7 +11,7 @@ public class Blobs implements Serializable {
     /** The content of the blob. */
     private String content;
 
-    public Blobs (File f) {
+    public Blobs(File f) {
         content = readContentsAsString(f);
         ID = sha1(content);
         saveBlob();

@@ -37,7 +37,8 @@ public class Staging implements Serializable {
         Commit head = getHeadCommit();
 
         /** If file is unchanged compared to the head commit, remove from staging area. */
-        if (head.getFileHash(f.getName()) != null && fileHash.equals(head.getFileHash(f.getName()))) {
+        if (head.getFileHash(f.getName()) != null
+                && fileHash.equals(head.getFileHash(f.getName()))) {
             stagedFiles.remove(f.getName());
         } else {
             stagedFiles.put(f.getName(), fileHash);
