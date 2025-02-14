@@ -93,7 +93,6 @@ public class Log {
 
         /** Print untracked files. */
         System.out.println("=== Untracked Files ===");
-        System.out.println("=== Untracked Files ===");
         List<String> cwdFiles = plainFilenamesIn(Repository.CWD);
         for (String file : cwdFiles) {
             boolean staContain = stagingArea.getStagedFiles().containsKey(file);
