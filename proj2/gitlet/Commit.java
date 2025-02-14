@@ -72,7 +72,7 @@ public class Commit implements Serializable {
         if (parent == null) {
             parentID = "";
         }
-        this.commitID = sha1(message, timestamp.toString(), parentID, serialize(blobFiles));
+        this.commitID = sha1(message, timestamp.toString(), parentID);
     }
 
     /** Save the commit and update head. */
