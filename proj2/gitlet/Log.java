@@ -39,21 +39,14 @@ public class Log {
     }
 
     public static void status() {
-
         /** Print branches. */
         System.out.println("=== Branches ===");
-        // Read the HEAD file to determine the current branch reference.
-        String headRef = readContentsAsString(Repository.getHeadFile());
-        // If HEAD is attached, extract the branch name by removing the "refs/heads/" prefix.
-        String currentBranch;
-        if (headRef.startsWith("refs/heads/")) {
-            currentBranch = headRef.substring("refs/heads/".length());
-        } else {
-            currentBranch = null;
-        }
-        // List only branch files from .gitlet/refs/heads.
-        File headsDir = Utils.join(Repository.getRefsDir(), "heads");
-        File[] branches = headsDir.listFiles();
+        // If HEAD is attached, the HEAD file holds the branch name.
+        String currentBranch = getCurrentBranchName();
+
+        // List branch files directly from .gitlet/refs.
+        File refsDir = Repository.getRefsDir();
+        File[] branches = refsDir.listFiles();
 
         for (File branch : branches) {
             // Compare the branch file name with the current branch name.

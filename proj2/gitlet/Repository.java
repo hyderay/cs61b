@@ -41,15 +41,11 @@ public class Repository {
         }
         GITLET_DIR.mkdir();
         REFS_DIR.mkdir();
-
-        File headsDir = Utils.join(REFS_DIR, "heads");
-        headsDir.mkdir();
-
         OBJECTS_DIR.mkdir();
         COMMIT_DIR.mkdir();
 
         // Initialize HEAD file with the default branch reference.
-        writeContents(HEAD_FILE, "refs/heads/master");
+        writeContents(HEAD_FILE, "master");
 
         // Create the initial commit.
         Commit initialCommit = new Commit();
@@ -190,7 +186,8 @@ public class Repository {
 
     public static boolean isHeadDetached() {
         String headContent = readContentsAsString(HEAD_FILE);
-        return !headContent.startsWith("refs/heads/");
+        File branchFile = new File(Repository.getRefsDir(), headContent);
+        return !branchFile.exists();
     }
 
     public static String getHeadCommitID() {

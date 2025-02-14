@@ -14,7 +14,8 @@ public class Branch implements Serializable {
             exit("A branch with that name already exists.");
         }
 
-        String headCommitID = readContentsAsString(Repository.getHeadFile());
+        // Use Repository.getHeadCommitID() to get the actual commit ID, not the branch reference.
+        String headCommitID = Repository.getHeadCommitID();
 
         writeContents(branchFile, headCommitID);
     }

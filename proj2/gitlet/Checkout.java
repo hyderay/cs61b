@@ -51,7 +51,7 @@ public class Checkout {
         untrackedFile(currentCommit, newCommit);
         checkoutCommit(currentCommit, newCommit);
 
-        writeContents(Repository.getHeadFile(), "refs/heads/" + branchName);
+        writeContents(Repository.getHeadFile(), "refs/" + branchName);
 
         Staging staging = new Staging();
         staging.clear();

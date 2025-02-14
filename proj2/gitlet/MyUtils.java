@@ -52,18 +52,12 @@ public class MyUtils {
 
     /** Get the branch file from .gitlet/refs. */
     public static File getBranchFile(String branchName) {
-        return Utils.join(Repository.getRefsDir(), "heads", branchName);
+        return Utils.join(Repository.getRefsDir(), branchName);
     }
 
     public static String getCurrentBranchName() {
-        File[] branches = Repository.getRefsDir().listFiles();
-        String headBranch = readContentsAsString(Repository.getHeadFile());
-
-        for (File branch : branches) {
-            String branchContent = readContentsAsString(branch);
-            if (branchContent.equals(headBranch)) {
-                return branch.getName();
-            }
+        if (!Repository.isHeadDetached()) {
+            return readContentsAsString(Repository.getHeadFile());
         }
         return null;
     }
