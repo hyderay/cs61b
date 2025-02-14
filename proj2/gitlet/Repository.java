@@ -75,13 +75,8 @@ public class Repository {
         // Process staged files (avoid redundant blob creation)
         for (String fileName : staging.getStagedFiles().keySet()) {
             File file = new File(fileName);
-            String fileHash = sha1(readContentsAsString(file));
-
-            // Only create a new blob if the file is actually different
-            if (!fileHash.equals(parentCommit.getFileHash(fileName))) {
-                Blobs blob = new Blobs(file);
-                newBlobFiles.put(fileName, blob.getID());
-            }
+            Blobs blob = new Blobs(file);
+            newBlobFiles.put(fileName, blob.getID());
         }
 
         // Process removed files
