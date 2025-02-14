@@ -51,6 +51,8 @@ public class Repository {
         // Initialize empty staging area
         Staging staging = new Staging();
         writeObject(staging.getStagingFile(), staging);
+
+        Branch.createBranch("master");
     }
 
     public static void add(String fileName) {
