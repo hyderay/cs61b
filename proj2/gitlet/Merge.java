@@ -138,6 +138,7 @@ public class Merge {
         String message = "Merged " + branchName + " into " + getCurrentBranchName() + ".";
         new Commit(message, headCommitID, blobFile);
         stagingArea.clear();
+        Branch.removeBranch(branchName);
     }
 
     private static String getCurrentBranchName() {
