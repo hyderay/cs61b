@@ -78,9 +78,9 @@ public class Log {
         System.out.println("=== Untracked Files ===");
         List<String> cwdFiles = plainFilenamesIn(Repository.CWD);
         for (String file : cwdFiles) {
-            boolean staContain = stagingArea.getStagedFiles().containsKey(file);
-            boolean headContain = headCommit.getFileHash(file) == null;
-            if (!staContain && headContain) {
+            boolean stagedInIndex = stagingArea.getStagedFiles().containsKey(file);
+            boolean trackedInHead = headCommit.getFileHash(file) != null;
+            if (!stagedInIndex && !trackedInHead) {
                 System.out.println(file);
             }
         }
@@ -102,18 +102,13 @@ public class Log {
         File refsDir = Repository.getRefsDir();
         File[] branches = refsDir.listFiles();
 
-        if (branches == null) {
-            return;
-        }
-
-        // Sort branches alphabetically
-        Arrays.sort(branches, Comparator.comparing(File::getName));
-
         for (File branch : branches) {
             String branchName = branch.getName();
-            System.out.println(branch.getName().equals(currentBranch)
-                    ? "*" + branchName
-                    : branchName);
+            if (branchName.equals(currentBranch)) {
+                System.out.println("*" + branchName);
+            } else {
+                System.out.println(branchName);
+            }
         }
 
         System.out.println();
