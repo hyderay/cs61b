@@ -57,7 +57,7 @@ public class MyUtils {
 
     public static String getCurrentBranchName() {
         if (!Repository.isHeadDetached()) {
-            return readContentsAsString(Repository.getHeadFile());
+            return readContentsAsString(Repository.getHeadFile()).trim();
         }
         return null;
     }
