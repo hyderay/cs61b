@@ -61,4 +61,19 @@ public class MyUtils {
         }
         return readContentsAsString(Repository.getHeadFile()).trim();
     }
+
+    public static boolean isStaged(File file) {
+        Staging stagingArea = new Staging();
+        for (String fileName : stagingArea.getStagedFiles().keySet()) {
+            if (file.getName().equals(fileName)) {
+                return true;
+            }
+        }
+        for (String fileName : stagingArea.getRemovedFiles().keySet()) {
+            if (file.getName().equals(fileName)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

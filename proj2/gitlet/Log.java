@@ -93,32 +93,37 @@ public class Log {
         System.out.println("=== Modifications Not Staged For Commit ===");
         Commit headCommit = getHeadCommit();
         Staging stagingArea = new Staging();
+        HashMap<String, String> blobFiles = headCommit.getBlobFiles();
+        HashMap<String, String> stagedFiles = stagingArea.getStagedFiles();
 
-        Set<String> filesToCheck = new TreeSet<>();
-        filesToCheck.addAll(headCommit.getBlobFiles().keySet());
-        filesToCheck.addAll(stagingArea.getStagedFiles().keySet());
-
-        for (String fileName : filesToCheck) {
-            // Skip files that are staged for removal.
-            if (stagingArea.getRemovedFiles().containsKey(fileName)) {
-                continue;
-            }
-            File file = Utils.join(Repository.CWD, fileName);
-
-            String expectedHash = headCommit.getFileHash(fileName);
-
-            // Case: file deleted from working directory (either it was tracked or staged).
-            if (!file.exists()) {
-                System.out.println(fileName + " (deleted)");
-            } else {
-                // Read the current file content and compare its SHA-1 to the expected hash.
-                String currentContent = Utils.readContentsAsString(file);
-                if (!Utils.sha1(currentContent).equals(expectedHash)) {
+        for (String fileName : blobFiles.keySet()) {
+            File currentFile = join(Repository.CWD, fileName);
+            if (!isStaged(currentFile)) {
+                if (!currentFile.exists()) {
+                    System.out.println(fileName + " (deleted)");
+                    continue;
+                }
+                String blobID = blobFiles.get(fileName);
+                File blobFile = join(Repository.getObjectsDir(), blobID);
+                Blobs blob = readObject(blobFile, Blobs.class);
+                String commitHash = blob.getContent();
+                if (!commitHash.equals(readContentsAsString(currentFile))) {
                     System.out.println(fileName + " (modified)");
                 }
             }
         }
-        System.out.println();
+
+        for (String fileName : stagedFiles.keySet()) {
+            File currentFile = join(Repository.CWD, fileName);
+            if (!currentFile.exists()) {
+                System.out.println(fileName + " (deleted)");
+                continue;
+            }
+            String stagedHash = stagedFiles.get(fileName);
+            if (!stagedHash.equals(readContentsAsString(currentFile))) {
+                System.out.println(fileName + " (modified)");
+            }
+        }
     }
 
     private static void printRemovedFiles() {
