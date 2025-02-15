@@ -61,6 +61,10 @@ public class Staging implements Serializable {
             exit("No reason to remove the file.");
         }
 
+        if (f.exists()) {
+            Utils.restrictedDelete(f);
+        }
+
         save();
     }
 
