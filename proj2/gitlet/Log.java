@@ -124,6 +124,7 @@ public class Log {
                 System.out.println(fileName + " (modified)");
             }
         }
+        System.out.println();
     }
 
     private static void printRemovedFiles() {
