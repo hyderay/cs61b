@@ -118,7 +118,8 @@ public class Log {
                 continue;
             }
             String stagedHash = stagedFiles.get(fileName);
-            if (!stagedHash.equals(readContentsAsString(currentFile))) {
+            String currentFileHash = sha1(readContentsAsString(currentFile));
+            if (!stagedHash.equals(currentFileHash)) {
                 System.out.println(fileName + " (modified)");
             }
         }
