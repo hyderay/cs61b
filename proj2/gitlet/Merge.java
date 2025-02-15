@@ -13,35 +13,29 @@ public class Merge {
         if (!stageArea.getStagedFiles().isEmpty() || !stageArea.getRemovedFiles().isEmpty()) {
             exit("You have uncommitted changes.");
         }
-
         /** Handle branch name doesn't exist. */
         File branchFile = getBranchFile(branchName);
         if (!branchFile.exists()) {
             exit("A branch with that name does not exist.");
         }
-
         /** Handle merge current branch. */
         String headCommitID = readContentsAsString(Repository.getHeadFile());
         String givenCommitID = readContentsAsString(branchFile);
         if (headCommitID.equals(givenCommitID)) {
             exit("Cannot merge a branch with itself.");
         }
-
         Commit headCommit = readObject(toCommitPath(headCommitID), Commit.class);
         Commit givenCommit = readObject(toCommitPath(givenCommitID), Commit.class);
         Commit splitPointCommit = findSplitPoint(headCommit, givenCommit);
-
         /** Split point is the same commit as the given branch. */
         if (splitPointCommit.getCommitID().equals(givenCommitID)) {
             exit("Given branch is an ancestor of the current branch.");
         }
-
         /** Split point is the current branch. */
         if (splitPointCommit.getCommitID().equals(headCommitID)) {
             Checkout.checkoutBranch(branchName);
             exit("Current branch fast-forwarded.");
         }
-
         HashMap<String, String> headMap = headCommit.getBlobFiles();
         HashMap<String, String> givenMap = givenCommit.getBlobFiles();
         HashMap<String, String> splitMap = splitPointCommit.getBlobFiles();

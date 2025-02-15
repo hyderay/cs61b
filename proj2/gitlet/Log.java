@@ -2,6 +2,8 @@ package gitlet;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import static gitlet.MyUtils.*;
@@ -39,33 +41,11 @@ public class Log {
     }
 
     public static void status() {
-        /** Print branches. */
-        System.out.println("=== Branches ===");
-        // If HEAD is attached, the HEAD file holds the branch name.
-        String currentBranch = getCurrentBranchName();
+        printBranches();
 
-        // List branch files directly from .gitlet/refs.
-        File refsDir = Repository.getRefsDir();
-        File[] branches = refsDir.listFiles();
+        printStagedFiles();
 
-        for (File branch : branches) {
-            // Compare the branch file name with the current branch name.
-            if (branch.getName().equals(currentBranch)) {
-                System.out.println("*" + branch.getName());
-            } else {
-                System.out.println(branch.getName());
-            }
-        }
-
-        System.out.println();
-
-        /** Print staged files. */
-        System.out.println("=== Staged Files ===");
         Staging stagingArea = new Staging();
-        for (String name : stagingArea.getStagedFiles().keySet()) {
-            System.out.println(name);
-        }
-        System.out.println();
 
         /** Print removed files. */
         System.out.println("=== Removed Files ===");
@@ -78,7 +58,10 @@ public class Log {
         System.out.println("=== Modifications Not Staged For Commit ===");
         Commit headCommit = getHeadCommit();
         for (String fileName : headCommit.getBlobFiles().keySet()) {
-            File file = new File(fileName);
+            if (stagingArea.getRemovedFiles().containsKey(fileName)) {
+                continue;
+            }
+            File file = Utils.join(Repository.CWD, fileName);
             if (!file.exists()) {
                 System.out.println(fileName + " (deleted)");
             } else {
@@ -110,5 +93,38 @@ public class Log {
             Commit commit = readObject(join(Repository.getCommitDir(), commitID), Commit.class);
             printCommit(commit);
         }
+    }
+
+    private static void printBranches() {
+        System.out.println("=== Branches ===");
+        String currentBranch = getCurrentBranchName();
+
+        File refsDir = Repository.getRefsDir();
+        File[] branches = refsDir.listFiles();
+
+        if (branches == null) {
+            return;
+        }
+
+        // Sort branches alphabetically
+        Arrays.sort(branches, Comparator.comparing(File::getName));
+
+        for (File branch : branches) {
+            String branchName = branch.getName();
+            System.out.println(branch.getName().equals(currentBranch)
+                    ? "*" + branchName
+                    : branchName);
+        }
+
+        System.out.println();
+    }
+
+    private static void printStagedFiles() {
+        System.out.println("=== Staged Files ===");
+        Staging stagingArea = new Staging();
+        for (String name : stagingArea.getStagedFiles().keySet()) {
+            System.out.println(name);
+        }
+        System.out.println();
     }
 }
