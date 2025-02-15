@@ -76,4 +76,11 @@ public class MyUtils {
         }
         return false;
     }
+
+    public static boolean safeDelete(File file) {
+        if (!file.getAbsolutePath().startsWith(Repository.GITLET_DIR.getAbsolutePath())) {
+            throw new IllegalArgumentException("not .gitlet working directory");
+        }
+        return file.delete();
+    }
 }

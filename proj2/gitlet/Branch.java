@@ -30,6 +30,6 @@ public class Branch implements Serializable {
         if (branchName.equals(currentBranch)) {
             exit("Cannot remove the current branch.");
         }
-        restrictedDelete(branchFile);
+        MyUtils.safeDelete(branchFile);
     }
 }
