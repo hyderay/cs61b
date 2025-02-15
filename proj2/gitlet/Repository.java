@@ -46,11 +46,10 @@ public class Repository {
 
         // Initialize HEAD file with the default branch reference.
         writeContents(HEAD_FILE, "master");
-
-        // Create the initial commit.
-        Commit initialCommit = new Commit();
-        // (The Commit constructor already saves the commit and updates HEAD.)
         File masterBranch = join(REFS_DIR, "master");
+        writeContents(masterBranch, "");
+
+        Commit initialCommit = new Commit();
         writeContents(masterBranch, initialCommit.getCommitID());
         // Initialize the staging area.
         Staging staging = new Staging();
@@ -186,7 +185,7 @@ public class Repository {
     }
 
     public static boolean isHeadDetached() {
-        String headContent = readContentsAsString(HEAD_FILE);
+        String headContent = readContentsAsString(HEAD_FILE).trim();
         File branchFile = new File(Repository.getRefsDir(), headContent);
         return !branchFile.exists();
     }

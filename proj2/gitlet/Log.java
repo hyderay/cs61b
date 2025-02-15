@@ -56,9 +56,6 @@ public class Log {
         System.out.println("=== Modifications Not Staged For Commit ===");
         Commit headCommit = getHeadCommit();
         for (String fileName : headCommit.getBlobFiles().keySet()) {
-            if (stagingArea.getRemovedFiles().containsKey(fileName)) {
-                continue;
-            }
             File file = Utils.join(Repository.CWD, fileName);
             if (!file.exists()) {
                 System.out.println(fileName + " (deleted)");
@@ -76,6 +73,7 @@ public class Log {
         System.out.println("=== Untracked Files ===");
         List<String> cwdFiles = plainFilenamesIn(Repository.CWD);
         for (String file : cwdFiles) {
+            // A file is untracked if it is neither staged nor present in the current (HEAD) commit.
             boolean stagedInIndex = stagingArea.getStagedFiles().containsKey(file);
             boolean trackedInHead = headCommit.getFileHash(file) != null;
             if (!stagedInIndex && !trackedInHead) {

@@ -67,7 +67,8 @@ public class Checkout {
             boolean isTrackedInCurrent = currentCommit.getBlobFiles().containsKey(file);
             boolean existsInNew = newCommit.getBlobFiles().containsKey(file);
             if (!isTrackedInCurrent && existsInNew) {
-                exit("There is an untracked file in the way; delete it, or add and commit it first.");
+                exit("There is an untracked file in the way;"
+                        + " delete it, or add and commit it first.");
             }
         }
     }
