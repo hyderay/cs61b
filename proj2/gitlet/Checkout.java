@@ -16,7 +16,8 @@ public class Checkout {
         }
         File blobFile = join(Repository.getObjectsDir(), fileHash);
         Blobs blob = readObject(blobFile, Blobs.class);
-        writeContents(new File(fileName), blob.getContent());
+        File file = Utils.join(Repository.CWD, fileName);
+        writeContents(file, blob.getContent());
     }
 
     public static void checkoutFileFromCommit(String commitID, String fileName) {
@@ -32,7 +33,8 @@ public class Checkout {
         }
         File blobFile = join(Repository.getObjectsDir(), fileHash);
         Blobs blob = readObject(blobFile, Blobs.class);
-        writeContents(new File(fileName), blob.getContent());
+        File file = Utils.join(Repository.CWD, fileName);
+        writeContents(file, blob.getContent());
     }
 
     public static void checkoutBranch(String branchName) {
@@ -40,9 +42,9 @@ public class Checkout {
         if (!branchFile.exists()) {
             exit("No such branch exists.");
         }
-        String currentHead = Repository.getHeadCommitID();
         String newCommitID = readContentsAsString(branchFile);
-        if (newCommitID.equals(currentHead)) {
+        String currentBranch = getCurrentBranchName();
+        if (branchName.equals(currentBranch)) {
             exit("No need to checkout the current branch.");
         }
         Commit newCommit = readObject(toCommitPath(newCommitID), Commit.class);
@@ -70,15 +72,15 @@ public class Checkout {
     }
 
     private static void checkoutCommit(Commit currentCommit, Commit newCommit) {
-        for (String file : newCommit.getBlobFiles().keySet()) {
-            File blobFile = join(Repository.getObjectsDir(), newCommit.getBlobFiles().get(file));
-            Blobs blob = readObject(blobFile, Blobs.class);
-            writeContents(new File(file), blob.getContent());
+        for (String fileName : newCommit.getBlobFiles().keySet()) {
+            String blobID = newCommit.getBlobFiles().get(fileName);
+            Blobs blob = readObject(join(Repository.getObjectsDir(), blobID), Blobs.class);
+            writeContents(join(Repository.CWD, fileName), blob.getContent());
         }
 
-        for (String file : currentCommit.getBlobFiles().keySet()) {
-            if (!newCommit.getBlobFiles().containsKey(file)) {
-                restrictedDelete(new File(file));
+        for (String fileName : currentCommit.getBlobFiles().keySet()) {
+            if (!newCommit.getBlobFiles().containsKey(fileName)) {
+                restrictedDelete(join(Repository.CWD, fileName));
             }
         }
     }

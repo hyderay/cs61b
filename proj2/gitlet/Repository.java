@@ -58,7 +58,7 @@ public class Repository {
     }
 
     public static void add(String fileName) {
-        File f = new File(fileName);
+        File f = Utils.join(Repository.CWD, fileName);
         Staging sta = new Staging();
         sta.add(f);
     }
@@ -112,7 +112,7 @@ public class Repository {
     }
 
     public static void rm(String fileName) {
-        File f = new File(fileName);
+        File f = Utils.join(Repository.CWD, fileName);
         Staging sta = new Staging();
         sta.remove(f);
     }

@@ -51,7 +51,8 @@ public class Merge {
         for (String file : givenMap.keySet()) {
             if (!splitMap.containsKey(file) && !headMap.containsKey(file)) {
                 Checkout.checkoutFileFromCommit(givenCommitID, file);
-                stageArea.add(new File(file));
+                File file2 = Utils.join(Repository.CWD, file);
+                stageArea.add(file2);
             }
         }
 
@@ -60,10 +61,12 @@ public class Merge {
             boolean modifiedCurrent = !headMap.getOrDefault(file, "").equals(splitMap.get(file));
             boolean modifiedGiven = !givenMap.getOrDefault(file, "").equals(splitMap.get(file));
             if (!modifiedCurrent && givenMap.get(file) == null) {
-                stageArea.remove(new File(file));
+                File file2 = Utils.join(Repository.CWD, file);
+                stageArea.remove(file2);
             } else if (!modifiedCurrent && modifiedGiven) {
                 Checkout.checkoutFileFromCommit(givenCommitID, file);
-                stageArea.add(new File(file));
+                File file2 = Utils.join(Repository.CWD, file);
+                stageArea.add(file2);
             } else if (modifiedCurrent && modifiedGiven) {
                 if (!givenMap.getOrDefault(file, "").equals(headMap.getOrDefault(file, ""))) {
                     handleConflicts(file, headMap, givenMap);
@@ -117,9 +120,10 @@ public class Merge {
                                         HashMap<String, String> given) {
         String content = "<<<<<<< HEAD\n" + current.getOrDefault(file, "")
                 + "\n=======\n" + given.getOrDefault(file, "") + "\n>>>>>>\n";
-        writeContents(new File(file), content);
+        File file2 = Utils.join(Repository.CWD, file);
+        writeContents(file2, content);
         Staging sta = new Staging();
-        sta.add(new File(file));
+        sta.add(file2);
     }
 
     private static void commitMerge(String headCommitID, String givenCommitID, String branchName) {
@@ -129,7 +133,7 @@ public class Merge {
 
         // Process staged and removed files as before.
         for (String fileName : stagingArea.getStagedFiles().keySet()) {
-            File file = new File(fileName);
+            File file = Utils.join(Repository.CWD, fileName);
             Blobs blob = new Blobs(file);
             blobFile.put(fileName, blob.getID());
         }
