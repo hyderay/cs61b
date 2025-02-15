@@ -4,8 +4,6 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import static gitlet.MyUtils.*;
 import static gitlet.Utils.*;
