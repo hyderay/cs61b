@@ -51,10 +51,10 @@ public class Checkout {
         untrackedFile(currentCommit, newCommit);
         checkoutCommit(currentCommit, newCommit);
 
-        writeContents(Repository.getHeadFile(), "refs/" + branchName);
+        // Update HEAD with just the branch name.
+        writeContents(Repository.getHeadFile(), branchName);
 
-        Staging staging = new Staging();
-        staging.clear();
+        new Staging().clear();
     }
 
     private static void untrackedFile(Commit currentCommit, Commit newCommit) {

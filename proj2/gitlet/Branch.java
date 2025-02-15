@@ -22,16 +22,14 @@ public class Branch implements Serializable {
 
     public static void removeBranch(String branchName) {
         File branchFile = getBranchFile(branchName);
-
         if (!branchFile.exists()) {
             exit("A branch with that name does not exist.");
         }
-
-        String headCommitID = readContentsAsString(Repository.getHeadFile());
-        if (headCommitID.equals(readContentsAsString(branchFile))) {
+        // Use the current branch name from MyUtils to check if we're on the branch.
+        String currentBranch = getCurrentBranchName();
+        if (branchName.equals(currentBranch)) {
             exit("Cannot remove the current branch.");
         }
-
         restrictedDelete(branchFile);
     }
 }

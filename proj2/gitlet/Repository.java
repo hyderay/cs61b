@@ -94,7 +94,7 @@ public class Repository {
         if (!Repository.isHeadDetached()) {
             // If HEAD is on a branch, update that branch reference.
             String headBranch = readContentsAsString(Repository.getHeadFile());
-            writeContents(new File(GITLET_DIR, headBranch), newCommitID);
+            writeContents(new File(Repository.getRefsDir(), headBranch), newCommitID);
         } else {
             // If HEAD is detached, update HEAD directly.
             writeContents(Repository.getHeadFile(), newCommitID);
