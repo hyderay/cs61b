@@ -2,7 +2,10 @@ package gitlet;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static gitlet.MyUtils.*;
 import static gitlet.Utils.*;
@@ -43,44 +46,11 @@ public class Log {
 
         printStagedFiles();
 
-        Staging stagingArea = new Staging();
+        printRemovedFiles();
 
-        /** Print removed files. */
-        System.out.println("=== Removed Files ===");
-        for (String name : stagingArea.getRemovedFiles().keySet()) {
-            System.out.println(name);
-        }
-        System.out.println();
+        printModifiedNotStage();
 
-        /** Print modifications not staged files. */
-        System.out.println("=== Modifications Not Staged For Commit ===");
-        Commit headCommit = getHeadCommit();
-        for (String fileName : headCommit.getBlobFiles().keySet()) {
-            File file = Utils.join(Repository.CWD, fileName);
-            if (!file.exists()) {
-                System.out.println(fileName + " (deleted)");
-            } else {
-                String currentContent = readContentsAsString(file);
-                String trackedFile = headCommit.getFileHash(fileName);
-                if (!sha1(currentContent).equals(trackedFile)) {
-                    System.out.println(fileName + " (modified)");
-                }
-            }
-        }
-        System.out.println();
-
-        /** Print untracked files. */
-        System.out.println("=== Untracked Files ===");
-        List<String> cwdFiles = plainFilenamesIn(Repository.CWD);
-        for (String file : cwdFiles) {
-            // A file is untracked if it is neither staged nor present in the current (HEAD) commit.
-            boolean stagedInIndex = stagingArea.getStagedFiles().containsKey(file);
-            boolean trackedInHead = headCommit.getFileHash(file) != null;
-            if (!stagedInIndex && !trackedInHead) {
-                System.out.println(file);
-            }
-        }
-        System.out.println();
+        printUntrackedFiles();
     }
 
     public static void globalLog() {
@@ -115,6 +85,63 @@ public class Log {
         Staging stagingArea = new Staging();
         for (String name : stagingArea.getStagedFiles().keySet()) {
             System.out.println(name);
+        }
+        System.out.println();
+    }
+
+    private static void printModifiedNotStage() {
+        System.out.println("=== Modifications Not Staged For Commit ===");
+        Commit headCommit = getHeadCommit();
+        Staging stagingArea = new Staging();
+
+        Set<String> filesToCheck = new TreeSet<>();
+        filesToCheck.addAll(headCommit.getBlobFiles().keySet());
+        filesToCheck.addAll(stagingArea.getStagedFiles().keySet());
+
+        for (String fileName : filesToCheck) {
+            // Skip files that are staged for removal.
+            if (stagingArea.getRemovedFiles().containsKey(fileName)) {
+                continue;
+            }
+            File file = Utils.join(Repository.CWD, fileName);
+
+            String expectedHash = headCommit.getFileHash(fileName);
+
+            // Case: file deleted from working directory (either it was tracked or staged).
+            if (!file.exists()) {
+                System.out.println(fileName + " (deleted)");
+            } else {
+                // Read the current file content and compare its SHA-1 to the expected hash.
+                String currentContent = Utils.readContentsAsString(file);
+                if (!Utils.sha1(currentContent).equals(expectedHash)) {
+                    System.out.println(fileName + " (modified)");
+                }
+            }
+        }
+        System.out.println();
+    }
+
+    private static void printRemovedFiles() {
+        System.out.println("=== Removed Files ===");
+        Staging stagingArea = new Staging();
+        for (String name : stagingArea.getRemovedFiles().keySet()) {
+            System.out.println(name);
+        }
+        System.out.println();
+    }
+
+    private static void printUntrackedFiles() {
+        System.out.println("=== Untracked Files ===");
+        List<String> cwdFiles = plainFilenamesIn(Repository.CWD);
+        Staging stagingArea = new Staging();
+        for (String file : cwdFiles) {
+            // A file is untracked if it is neither staged nor present in the current (HEAD) commit.
+            boolean stagedInIndex = stagingArea.getStagedFiles().containsKey(file);
+            Commit headCommit = getHeadCommit();
+            boolean trackedInHead = headCommit.getFileHash(file) != null;
+            if (!stagedInIndex && !trackedInHead) {
+                System.out.println(file);
+            }
         }
         System.out.println();
     }

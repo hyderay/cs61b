@@ -36,8 +36,7 @@ public class Staging implements Serializable {
         Commit head = getHeadCommit();
 
         // If the file is unchanged compared to the head commit, remove it from staging.
-        if (head.getFileHash(f.getName()) != null
-                && fileHash.equals(head.getFileHash(f.getName()))) {
+        if (fileHash.equals(head.getFileHash(f.getName()))) {
             stagedFiles.remove(f.getName());
         } else {
             // Create and save the blob immediately.

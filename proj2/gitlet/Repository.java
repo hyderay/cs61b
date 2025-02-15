@@ -63,7 +63,7 @@ public class Repository {
     }
 
     public static void commit(String message) {
-        if (message == null || message.trim().isEmpty()) {
+        if (message == null || message.isEmpty()) {
             exit("Please enter a commit message.");
         }
 
@@ -185,7 +185,7 @@ public class Repository {
     }
 
     public static boolean isHeadDetached() {
-        String headContent = readContentsAsString(HEAD_FILE).trim();
+        String headContent = readContentsAsString(HEAD_FILE);
         File branchFile = new File(Repository.getRefsDir(), headContent);
         return !branchFile.exists();
     }
