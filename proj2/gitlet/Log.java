@@ -2,8 +2,6 @@ package gitlet;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import static gitlet.MyUtils.*;

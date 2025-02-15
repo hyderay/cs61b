@@ -16,16 +16,15 @@ public class Checkout {
         }
         File blobFile = join(Repository.getObjectsDir(), fileHash);
         Blobs blob = readObject(blobFile, Blobs.class);
-        File file = Utils.join(Repository.CWD, fileName);
-        writeContents(file, blob.getContent());
+        File targetFile = join(Repository.CWD, fileName);
+        writeContents(targetFile, blob.getContent());
     }
 
     public static void checkoutFileFromCommit(String commitID, String fileName) {
-        File commitFile = toCommitPath(commitID);
-        if (!commitFile.exists()) {   // Check if the file actually exists on disk
+        File commitFile = MyUtils.toCommitPath(commitID);
+        if (!commitFile.exists()) {
             exit("No commit with that id exists.");
         }
-
         Commit commit = readObject(commitFile, Commit.class);
         String fileHash = commit.getFileHash(fileName);
         if (fileHash == null) {
@@ -33,54 +32,42 @@ public class Checkout {
         }
         File blobFile = join(Repository.getObjectsDir(), fileHash);
         Blobs blob = readObject(blobFile, Blobs.class);
-        File file = Utils.join(Repository.CWD, fileName);
-        writeContents(file, blob.getContent());
+        File targetFile = join(Repository.CWD, fileName);
+        writeContents(targetFile, blob.getContent());
     }
 
     public static void checkoutBranch(String branchName) {
-        File branchFile = getBranchFile(branchName);
+        File branchFile = MyUtils.getBranchFile(branchName);
         if (!branchFile.exists()) {
             exit("No such branch exists.");
         }
+        // Read the commit ID that the branch points to.
         String newCommitID = readContentsAsString(branchFile);
         String currentBranch = getCurrentBranchName();
         if (branchName.equals(currentBranch)) {
             exit("No need to checkout the current branch.");
         }
-        Commit newCommit = readObject(toCommitPath(newCommitID), Commit.class);
+        Commit newCommit = readObject(MyUtils.toCommitPath(newCommitID), Commit.class);
         Commit currentCommit = getHeadCommit();
-
-        untrackedFile(currentCommit, newCommit);
-        checkoutCommit(currentCommit, newCommit);
-
-        // Update HEAD with just the branch name.
+        // Check for untracked files that would be overwritten.
+        checkUntrackedFiles(currentCommit, newCommit);
+        // Update the working directory to reflect the new commit.
+        updateWorkingDirectory(currentCommit, newCommit);
+        // Update HEAD to point to the branch name.
         writeContents(Repository.getHeadFile(), branchName);
-
+        // Clear the staging area.
         new Staging().clear();
     }
 
-    private static void untrackedFile(Commit currentCommit, Commit newCommit) {
+    private static void checkUntrackedFiles(Commit currentCommit, Commit newCommit) {
         List<String> cwdFiles = plainFilenamesIn(Repository.CWD);
         for (String file : cwdFiles) {
-            boolean currentContain = currentCommit.getBlobFiles().containsKey(file);
-            boolean newContain = newCommit.getBlobFiles().containsKey(file);
-            if (!currentContain && newContain) {
-                exit("There is an untracked file in the way; "
-                        + "delete it, or add and commit it first.");
-            }
-        }
-    }
-
-    private static void checkoutCommit(Commit currentCommit, Commit newCommit) {
-        for (String fileName : newCommit.getBlobFiles().keySet()) {
-            String blobID = newCommit.getBlobFiles().get(fileName);
-            Blobs blob = readObject(join(Repository.getObjectsDir(), blobID), Blobs.class);
-            writeContents(join(Repository.CWD, fileName), blob.getContent());
-        }
-
-        for (String fileName : currentCommit.getBlobFiles().keySet()) {
-            if (!newCommit.getBlobFiles().containsKey(fileName)) {
-                restrictedDelete(join(Repository.CWD, fileName));
+            // A file is considered untracked if it is not in the current commit,
+            // but it is tracked in the new commit.
+            boolean isTrackedInCurrent = currentCommit.getBlobFiles().containsKey(file);
+            boolean existsInNew = newCommit.getBlobFiles().containsKey(file);
+            if (!isTrackedInCurrent && existsInNew) {
+                exit("There is an untracked file in the way; delete it, or add and commit it first.");
             }
         }
     }
@@ -93,12 +80,29 @@ public class Checkout {
         Commit targetCommit = readObject(commitFile, Commit.class);
         Commit currentCommit = getHeadCommit();
 
-        untrackedFile(currentCommit, targetCommit);
-        checkoutCommit(currentCommit, targetCommit);
+        checkUntrackedFiles(currentCommit, targetCommit);
+        updateWorkingDirectory(currentCommit, targetCommit);
 
         writeContents(Repository.getHeadFile(), commitID);
 
         Staging staging = new Staging();
         staging.clear();
+    }
+
+    private static void updateWorkingDirectory(Commit currentCommit, Commit newCommit) {
+        // Write new/modified files from the new commit.
+        for (String fileName : newCommit.getBlobFiles().keySet()) {
+            String blobID = newCommit.getBlobFiles().get(fileName);
+            File blobFile = join(Repository.getObjectsDir(), blobID);
+            Blobs blob = readObject(blobFile, Blobs.class);
+            File targetFile = join(Repository.CWD, fileName);
+            writeContents(targetFile, blob.getContent());
+        }
+        // Remove files that exist in the current commit but not in the new commit.
+        for (String fileName : currentCommit.getBlobFiles().keySet()) {
+            if (!newCommit.getBlobFiles().containsKey(fileName)) {
+                restrictedDelete(join(Repository.CWD, fileName));
+            }
+        }
     }
 }
