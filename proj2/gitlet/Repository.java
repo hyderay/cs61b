@@ -32,9 +32,6 @@ public class Repository {
     /** The commit dictionary for storing commit. */
     private static final File COMMIT_DIR = join(GITLET_DIR, "commit");
 
-
-
-
     public static void init() {
         if (GITLET_DIR.exists()) {
             exit("A Gitlet version-control system already exists in the current directory.");

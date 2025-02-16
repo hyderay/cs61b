@@ -86,7 +86,7 @@ public class Commit implements Serializable {
             writeContents(headFile, commitID);
         } else {
             // If HEAD points to a branch, update that branch file in refs
-            File branchFile = new File(Repository.getRefsDir(), headContent);
+            File branchFile = getBranchFile(headContent);
             writeContents(branchFile, commitID);
         }
     }

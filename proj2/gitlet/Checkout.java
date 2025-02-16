@@ -21,6 +21,7 @@ public class Checkout {
     }
 
     public static void checkoutFileFromCommit(String commitID, String fileName) {
+        commitID = getFullCommitID(commitID);
         File commitFile = MyUtils.toCommitPath(commitID);
         if (!commitFile.exists()) {
             exit("No commit with that id exists.");
@@ -74,6 +75,7 @@ public class Checkout {
     }
 
     public static void reset(String commitID) {
+        commitID = getFullCommitID(commitID);
         File commitFile = toCommitPath(commitID);
         if (!commitFile.exists()) {
             exit("No commit with that id exists.");
@@ -84,7 +86,13 @@ public class Checkout {
         checkUntrackedFiles(currentCommit, targetCommit);
         updateWorkingDirectory(currentCommit, targetCommit);
 
-        writeContents(Repository.getHeadFile(), commitID);
+        if (Repository.isHeadDetached()) {
+            writeContents(Repository.getHeadFile(), commitID);
+        } else {
+            String branchName = readContentsAsString(Repository.getHeadFile());
+            File branchFile = MyUtils.getBranchFile(branchName);
+            writeContents(branchFile, commitID);
+        }
 
         Staging staging = new Staging();
         staging.clear();
@@ -105,5 +113,28 @@ public class Checkout {
                 restrictedDelete(join(Repository.CWD, fileName));
             }
         }
+    }
+
+    private static String getFullCommitID(String abbreviated) {
+        // If a commit file with the abbreviated name exists exactly, return it.
+        File commitFile = MyUtils.toCommitPath(abbreviated);
+        if (commitFile.exists()) {
+            return abbreviated;
+        }
+        // Otherwise, search for commit files that start with the abbreviation.
+        List<String> commits = plainFilenamesIn(Repository.getCommitDir());
+        String fullID = null;
+        for (String id : commits) {
+            if (id.startsWith(abbreviated)) {
+                if (fullID != null) {  // Ambiguous abbreviation: more than one match.
+                    exit("No commit with that id exists.");
+                }
+                fullID = id;
+            }
+        }
+        if (fullID == null) {  // No match found.
+            exit("No commit with that id exists.");
+        }
+        return fullID;
     }
 }
