@@ -46,8 +46,39 @@ public class Merge {
         // Perform merges.
         boolean conflict = mergeFiles(splitCommit, currCommit, givenCommit);
 
-        // Commit merge if non-trivial...
-        // (unchanged code omitted for brevity)
+        // 5) Create the merge commit automatically, unless trivial
+        // Build a new snapshot from the HEAD commit’s blobs plus anything staged.
+        HashMap<String, String> newBlobs = new HashMap<>(currCommit.getBlobFiles());
+
+        // Apply staged additions
+        for (String fileName : stage.getStagedFiles().keySet()) {
+            newBlobs.put(fileName, stage.getStagedFiles().get(fileName));
+        }
+        // Apply staged removals
+        for (String fileName : stage.getRemovedFiles().keySet()) {
+            newBlobs.remove(fileName);
+        }
+
+        // If the result ended up with no changes to commit, just let the normal
+        // commit error happen:
+        if (stage.getStagedFiles().isEmpty() && stage.getRemovedFiles().isEmpty()) {
+            // The spec says: “If merge would generate an error because the commit that
+            // it does have no changes, let the normal commit error message go through.”
+            MyUtils.exit("No changes added to the commit.");
+        }
+
+        // Actually create the merge commit:
+        String msg = "Merged " + branchName + " into " + currentBranch + ".";
+        // This constructor sets the two parents and updates HEAD:
+        Commit mergeCommit = new Commit(msg,
+                currCommit.getCommitID(),
+                givenCommit.getCommitID(),
+                newBlobs);
+
+        // Clear staging
+        stage.clear();
+
+        // Finally, if we had any conflicts, let the user know
         if (conflict) {
             System.out.println("Encountered a merge conflict.");
         }
