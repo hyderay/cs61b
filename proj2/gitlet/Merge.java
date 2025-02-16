@@ -87,12 +87,25 @@ public class Merge {
 
     private static void handleConflicts(String file, HashMap<String, String> current,
                                         HashMap<String, String> given) {
-        String content = "<<<<<<< HEAD\n" + current.getOrDefault(file, "")
-                + "\n=======\n" + given.getOrDefault(file, "") + "\n>>>>>>>\n";
-        File file2 = Utils.join(Repository.CWD, file);
-        writeContents(file2, content);
-        Staging sta = new Staging();
-        sta.add(file2);
+        String headContent = "";
+        String givenContent = "";
+        String headBlobID = current.get(file);
+        String givenBlobID = given.get(file);
+        if (headBlobID != null) {
+            File headBlobFile = Utils.join(Repository.getObjectsDir(), headBlobID);
+            Blobs headBlob = Utils.readObject(headBlobFile, Blobs.class);
+            headContent = headBlob.getContent();
+        }
+        if (givenBlobID != null) {
+            File givenBlobFile = Utils.join(Repository.getObjectsDir(), givenBlobID);
+            Blobs givenBlob = Utils.readObject(givenBlobFile, Blobs.class);
+            givenContent = givenBlob.getContent();
+        }
+        String content = "<<<<<<< HEAD\n" + headContent
+                + "\n=======\n" + givenContent
+                + "\n>>>>>>>";
+        File conflictFile = Utils.join(Repository.CWD, file);
+        writeContents(conflictFile, content);
     }
 
     private static void commitMerge(String headCommitID, String givenCommitID, String branchName) {
