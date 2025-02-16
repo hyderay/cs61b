@@ -193,7 +193,7 @@ public class Repository {
             return headContent; // Direct commit ID
         } else {
             File branchFile = new File(Repository.getRefsDir(), headContent);
-            return readContentsAsString(branchFile).trim();
+            return readContentsAsString(branchFile);
         }
     }
 }

@@ -87,35 +87,10 @@ public class Merge {
 
     private static void handleConflicts(String file, HashMap<String, String> current,
                                         HashMap<String, String> given) {
-        String currentContent = "";
-        String givenContent = "";
-
-        // If the current branch has the file, retrieve its actual content from the blob.
-        if (current.containsKey(file)) {
-            String currentBlobID = current.get(file);
-            File currentBlobFile = Utils.join(Repository.getObjectsDir(), currentBlobID);
-            Blobs currentBlob = readObject(currentBlobFile, Blobs.class);
-            currentContent = currentBlob.getContent();
-        }
-
-        // If the given branch has the file, retrieve its actual content from the blob.
-        if (given.containsKey(file)) {
-            String givenBlobID = given.get(file);
-            File givenBlobFile = Utils.join(Repository.getObjectsDir(), givenBlobID);
-            Blobs givenBlob = readObject(givenBlobFile, Blobs.class);
-            givenContent = givenBlob.getContent();
-        }
-
-        // Construct the conflict markers with the actual file contents.
-        String content = "<<<<<<< HEAD\n" + currentContent +
-                "\n=======\n" + givenContent +
-                "\n>>>>>>>\n";
-
-        // Write the conflict content to the file in the working directory.
+        String content = "<<<<<<< HEAD\n" + current.getOrDefault(file, "")
+                + "\n=======\n" + given.getOrDefault(file, "") + "\n>>>>>>>\n";
         File file2 = Utils.join(Repository.CWD, file);
         writeContents(file2, content);
-
-        // Stage the conflicted file.
         Staging sta = new Staging();
         sta.add(file2);
     }
