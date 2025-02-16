@@ -15,9 +15,14 @@ public class Merge {
             MyUtils.exit("A branch with that name does not exist.");
         }
 
+        String currentBranch = MyUtils.getCurrentBranchName();
+        if (branchName.equals(currentBranch)) {
+            MyUtils.exit("Cannot merge a branch with itself.");
+        }
+
         Commit currCommit = MyUtils.getHeadCommit();
         String givenID = Utils.readContentsAsString(branchFile).trim();
-        Commit givenCommit = Utils.readObject(MyUtils.toCommitPath(givenID), Commit.class); // read from branch
+        Commit givenCommit = Utils.readObject(MyUtils.toCommitPath(givenID), Commit.class);
         MyUtils.checkUntrackedFiles(currCommit, givenCommit);
 
         String splitID = findSplitPoint(currCommit.getCommitID(), givenCommit.getCommitID());
@@ -43,11 +48,6 @@ public class Merge {
 
         if (stage.getStagedFiles().isEmpty() && stage.getRemovedFiles().isEmpty()) {
             MyUtils.exit("No changes added to the commit.");
-        }
-
-        String currentBranch = MyUtils.getCurrentBranchName();
-        if (branchName.equals(currentBranch)) {
-            MyUtils.exit("Cannot merge a branch with itself.");
         }
 
         String msg = "Merged " + branchName + " into " + currentBranch + ".";
