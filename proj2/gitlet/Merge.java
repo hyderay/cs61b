@@ -6,24 +6,23 @@ import java.util.*;
 public class Merge {
 
     public static void merge(String branchName) {
-        // 1) Preliminary checks
         Staging stage = new Staging();
         if (!stage.getStagedFiles().isEmpty() || !stage.getRemovedFiles().isEmpty()) {
             MyUtils.exit("You have uncommitted changes.");
         }
-        // ... check branch existence, same-branch merge, etc. ...
-
         File branchFile = MyUtils.getBranchFile(branchName);
+        if (!branchFile.exists()) {
+            MyUtils.exit("A branch with that name does not exist.");
+        }
+
         Commit currCommit = MyUtils.getHeadCommit();
         String givenID = Utils.readContentsAsString(branchFile).trim();
         Commit givenCommit = Utils.readObject(MyUtils.toCommitPath(givenID), Commit.class); // read from branch
         MyUtils.checkUntrackedFiles(currCommit, givenCommit);
 
-        // 2) Find split point
         String splitID = findSplitPoint(currCommit.getCommitID(), givenCommit.getCommitID());
         Commit splitCommit = Utils.readObject(MyUtils.toCommitPath(splitID), Commit.class);
 
-        // 3) Trivial cases
         if (splitID.equals(givenCommit.getCommitID())) {
             MyUtils.exit("Given branch is an ancestor of the current branch.");
         }
@@ -32,11 +31,8 @@ public class Merge {
             MyUtils.exit("Current branch fast-forwarded.");
         }
 
-        // 4) Do the merge using the SAME 'stage'
         boolean conflict = mergeFiles(splitCommit, currCommit, givenCommit, stage);
 
-        // 5) Attempt to commit
-        // Re-load any newly staged changes from 'stage'
         HashMap<String, String> newBlobs = new HashMap<>(currCommit.getBlobFiles());
         for (String f : stage.getStagedFiles().keySet()) {
             newBlobs.put(f, stage.getStagedFiles().get(f));
@@ -46,13 +42,15 @@ public class Merge {
         }
 
         if (stage.getStagedFiles().isEmpty() && stage.getRemovedFiles().isEmpty()) {
-            // No net changes from the merge => "No changes added ..."
             MyUtils.exit("No changes added to the commit.");
         }
 
         String currentBranch = MyUtils.getCurrentBranchName();
+        if (branchName.equals(currentBranch)) {
+            MyUtils.exit("Cannot merge a branch with itself.");
+        }
+
         String msg = "Merged " + branchName + " into " + currentBranch + ".";
-        // Make merge commit with two parents
         new Commit(msg, currCommit.getCommitID(), givenCommit.getCommitID(), newBlobs);
 
         stage.clear();
@@ -174,8 +172,12 @@ public class Merge {
                 return curr;
             }
             Commit c = Utils.readObject(MyUtils.toCommitPath(curr), Commit.class);
-            if (c.getParent() != null) queue.add(c.getParent());
-            if (c.getSecondParent() != null) queue.add(c.getSecondParent());
+            if (c.getParent() != null) {
+                queue.add(c.getParent());
+            }
+            if (c.getSecondParent() != null) {
+                queue.add(c.getSecondParent());
+            }
         }
         return commitID; // Fallback, should never happen if there's a common root.
     }
