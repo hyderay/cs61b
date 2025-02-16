@@ -51,19 +51,14 @@ public class Staging implements Serializable {
     /** Remove a file from staging area. */
     public void remove(File f) {
         Commit head = getHeadCommit();
-
         if (stagedFiles.containsKey(f.getName())) {
             stagedFiles.remove(f.getName());
         } else if (head.getFileHash(f.getName()) != null) {
             removedFiles.put(f.getName(), head.getFileHash(f.getName()));
+            Utils.restrictedDelete(f);
         } else {
             exit("No reason to remove the file.");
         }
-
-        if (f.exists()) {
-            Utils.restrictedDelete(f);
-        }
-
         save();
     }
 
