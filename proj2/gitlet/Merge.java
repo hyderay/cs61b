@@ -6,94 +6,70 @@ import java.util.*;
 public class Merge {
 
     public static void merge(String branchName) {
-        // Preliminary checks, plus find split point...
-        // (unchanged code omitted for brevity)
-        // 1) Preliminary checks.
+        // 1) Preliminary checks
         Staging stage = new Staging();
         if (!stage.getStagedFiles().isEmpty() || !stage.getRemovedFiles().isEmpty()) {
             MyUtils.exit("You have uncommitted changes.");
         }
+        // ... check branch existence, same-branch merge, etc. ...
+
         File branchFile = MyUtils.getBranchFile(branchName);
-        if (!branchFile.exists()) {
-            MyUtils.exit("A branch with that name does not exist.");
-        }
-        String currentBranch = MyUtils.getCurrentBranchName();
-        if (branchName.equals(currentBranch)) {
-            MyUtils.exit("Cannot merge a branch with itself.");
-        }
-        // Get commits.
         Commit currCommit = MyUtils.getHeadCommit();
         String givenID = Utils.readContentsAsString(branchFile).trim();
-        Commit givenCommit = Utils.readObject(MyUtils.toCommitPath(givenID), Commit.class);
-
-        // Check for untracked files that would be overwritten or deleted by merge.
+        Commit givenCommit = Utils.readObject(MyUtils.toCommitPath(givenID), Commit.class); // read from branch
         MyUtils.checkUntrackedFiles(currCommit, givenCommit);
 
-        // 2) Find split point (the latest common ancestor).
+        // 2) Find split point
         String splitID = findSplitPoint(currCommit.getCommitID(), givenCommit.getCommitID());
         Commit splitCommit = Utils.readObject(MyUtils.toCommitPath(splitID), Commit.class);
 
-        // 3) Trivial cases.
+        // 3) Trivial cases
         if (splitID.equals(givenCommit.getCommitID())) {
             MyUtils.exit("Given branch is an ancestor of the current branch.");
         }
         if (splitID.equals(currCommit.getCommitID())) {
-            // Fast-forward: just check out given branch.
             Checkout.checkoutBranch(branchName);
             MyUtils.exit("Current branch fast-forwarded.");
         }
 
-        // Perform merges.
-        boolean conflict = mergeFiles(splitCommit, currCommit, givenCommit);
+        // 4) Do the merge using the SAME 'stage'
+        boolean conflict = mergeFiles(splitCommit, currCommit, givenCommit, stage);
 
-        // 5) Create the merge commit automatically, unless trivial
-        // Build a new snapshot from the HEAD commit’s blobs plus anything staged.
+        // 5) Attempt to commit
+        // Re-load any newly staged changes from 'stage'
         HashMap<String, String> newBlobs = new HashMap<>(currCommit.getBlobFiles());
-
-        // Apply staged additions
-        for (String fileName : stage.getStagedFiles().keySet()) {
-            newBlobs.put(fileName, stage.getStagedFiles().get(fileName));
+        for (String f : stage.getStagedFiles().keySet()) {
+            newBlobs.put(f, stage.getStagedFiles().get(f));
         }
-        // Apply staged removals
-        for (String fileName : stage.getRemovedFiles().keySet()) {
-            newBlobs.remove(fileName);
+        for (String f : stage.getRemovedFiles().keySet()) {
+            newBlobs.remove(f);
         }
 
-        // If the result ended up with no changes to commit, just let the normal
-        // commit error happen:
         if (stage.getStagedFiles().isEmpty() && stage.getRemovedFiles().isEmpty()) {
-            // The spec says: “If merge would generate an error because the commit that
-            // it does have no changes, let the normal commit error message go through.”
+            // No net changes from the merge => "No changes added ..."
             MyUtils.exit("No changes added to the commit.");
         }
 
-        // Actually create the merge commit:
+        String currentBranch = MyUtils.getCurrentBranchName();
         String msg = "Merged " + branchName + " into " + currentBranch + ".";
-        // This constructor sets the two parents and updates HEAD:
-        Commit mergeCommit = new Commit(msg,
-                currCommit.getCommitID(),
-                givenCommit.getCommitID(),
-                newBlobs);
+        // Make merge commit with two parents
+        new Commit(msg, currCommit.getCommitID(), givenCommit.getCommitID(), newBlobs);
 
-        // Clear staging
         stage.clear();
-
-        // Finally, if we had any conflicts, let the user know
         if (conflict) {
             System.out.println("Encountered a merge conflict.");
         }
     }
 
-    /** Merge the files between SPLIT, CURRENT, and GIVEN commits.
-     *  Returns true if a conflict occurred. */
-    private static boolean mergeFiles(Commit split, Commit current, Commit given) {
+    /** Merge all file differences into 'stage'. */
+    private static boolean mergeFiles(Commit split, Commit current,
+                                      Commit given, Staging stage) {
         boolean conflict = false;
         Set<String> allFiles = new HashSet<>();
         allFiles.addAll(split.getBlobFiles().keySet());
         allFiles.addAll(current.getBlobFiles().keySet());
         allFiles.addAll(given.getBlobFiles().keySet());
 
-        Staging stage = new Staging();
         for (String file : allFiles) {
             String spHash = split.getFileHash(file);
             String curHash = current.getFileHash(file);
@@ -103,73 +79,50 @@ public class Merge {
             boolean spSameGiv = Objects.equals(spHash, givHash);
             boolean curSameGiv = Objects.equals(curHash, givHash);
 
-            /*
-             * According to the project spec:
-             *
-             * 1) If a file is unchanged in current branch vs. split
-             *    and changed in given branch vs. split,
-             *    then take the given version (including the case that it's removed).
-             *
-             * 2) If a file is unchanged in given branch vs. split
-             *    and changed in current branch vs. split,
-             *    then keep the current version (including if it was removed).
-             *
-             * 3) If the file is changed in both branches in the same way
-             *    (same new hash or both removed), do nothing.
-             *
-             * 4) Otherwise, if changed in both branches differently => conflict.
-             */
-
-            // Case (3): both changed it the same way (or both removed it)
-            if (!spSameCur && !spSameGiv && curSameGiv) {
-                // They converged on the same new content (or both removed). No action needed.
-                continue;
-            }
-
-            // Case (1): Unchanged in current, changed in given => adopt given
+            // (1) If unchanged in current, changed in given => adopt given
             if (spSameCur && !spSameGiv) {
                 checkoutAndStage(file, givHash, stage);
                 continue;
             }
 
-            // Case (2): Unchanged in given, changed in current => keep current
+            // (2) If unchanged in given, changed in current => keep current
             if (spSameGiv && !spSameCur) {
-                // i.e. do nothing to the working file, since current's version is already in place
-                // (If the current version is "removed," it stays removed.)
+                // do nothing
                 continue;
             }
 
-            // If we get here, the file must have been changed in both branches differently => conflict
-            // This includes either different new contents or (one side changed file content,
-            // the other side removed it) etc.
-            conflict = true;
-            resolveConflict(file, curHash, givHash, stage);
-        }
+            // (3) If changed in both the same way => do nothing
+            if (!spSameCur && !spSameGiv && curSameGiv) {
+                // both changed it but ended up the same
+                continue;
+            }
 
-        stage.save();
+            // (4) Otherwise => conflict
+            if (!Objects.equals(curHash, givHash)) {
+                conflict = true;
+                resolveConflict(file, curHash, givHash, stage);
+            }
+        }
+        stage.save(); // persist
         return conflict;
     }
 
-    /** Checks out blobHash (or removes file if null) and stages. */
     private static void checkoutAndStage(String file, String blobHash, Staging stage) {
         if (blobHash == null) {
-            // Remove the file if present, stage for removal
             File f = Utils.join(Repository.CWD, file);
             if (f.exists()) {
                 Utils.restrictedDelete(f);
             }
-            stage.remove(f);
+            stage.remove(f);       // Stage removal
         } else {
-            // Write the given branch's blob to the working directory
             File blobFile = Utils.join(Repository.getObjectsDir(), blobHash);
             Blobs blob = Utils.readObject(blobFile, Blobs.class);
             File target = Utils.join(Repository.CWD, file);
             Utils.writeContents(target, blob.getContent());
-            stage.add(target);
+            stage.add(target);     // Stage addition
         }
     }
 
-    /** Writes conflict markers and stages the result. */
     private static void resolveConflict(String file,
                                         String curHash, String givHash, Staging stage) {
         String curContent = (curHash == null) ? "" : readContent(curHash);
@@ -179,12 +132,11 @@ public class Merge {
                 + "=======\n"
                 + givContent
                 + ">>>>>>>\n";
-        File target = Utils.join(Repository.CWD, file);
-        Utils.writeContents(target, conflictText);
-        stage.add(target);
+        File outFile = Utils.join(Repository.CWD, file);
+        Utils.writeContents(outFile, conflictText);
+        stage.add(outFile); // Stage the conflict
     }
 
-    /** Reads the contents from a blob hash. */
     private static String readContent(String blobHash) {
         File blobFile = Utils.join(Repository.getObjectsDir(), blobHash);
         Blobs blob = Utils.readObject(blobFile, Blobs.class);
