@@ -164,8 +164,7 @@ public class Merge {
                 File file2 = Utils.join(Repository.CWD, file);
                 stageArea.add(file2);
             } else if (modifiedCurrent && modifiedGiven) {
-                if (!givenMap.getOrDefault(file, "")
-                        .equals(headMap.getOrDefault(file, ""))) {
+                if (!givenMap.getOrDefault(file, "").equals(headMap.getOrDefault(file, ""))) {
                     handleConflicts(file, headMap, givenMap);
                     hasConflicts = true;
                 }
