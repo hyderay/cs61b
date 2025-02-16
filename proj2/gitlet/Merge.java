@@ -152,28 +152,53 @@ public class Merge {
         Staging stageArea = new Staging();
         boolean hasConflicts = false;
 
+        // Process files that existed at the split point.
         for (String file : splitMap.keySet()) {
             boolean modifiedCurrent = !headMap.getOrDefault(file, "").equals(splitMap.get(file));
             boolean modifiedGiven = !givenMap.getOrDefault(file, "").equals(splitMap.get(file));
 
             if (!modifiedCurrent && givenMap.get(file) == null) {
+                // File was deleted in given branch and unchanged in current branch.
                 File file2 = Utils.join(Repository.CWD, file);
                 stageArea.remove(file2);
             } else if (!modifiedCurrent && modifiedGiven) {
+                // File unchanged in current branch but modified in given branch.
                 Checkout.checkoutFileFromCommit(givenCommitID, file);
                 File file2 = Utils.join(Repository.CWD, file);
                 stageArea.add(file2);
             } else if (modifiedCurrent && modifiedGiven) {
+                // File modified in both branches.
                 if (!givenMap.getOrDefault(file, "").equals(headMap.getOrDefault(file, ""))) {
                     handleConflicts(file, headMap, givenMap);
                     hasConflicts = true;
+                    File file2 = Utils.join(Repository.CWD, file);
+                    stageArea.add(file2);
                 }
             } else if (modifiedCurrent && givenMap.get(file) == null) {
+                // File modified in current branch and deleted in given branch.
                 handleConflicts(file, headMap, givenMap);
                 hasConflicts = true;
+                File file2 = Utils.join(Repository.CWD, file);
+                stageArea.add(file2);
             } else if (modifiedGiven && headMap.get(file) == null) {
+                // File modified in given branch and deleted in current branch.
                 handleConflicts(file, headMap, givenMap);
                 hasConflicts = true;
+                File file2 = Utils.join(Repository.CWD, file);
+                stageArea.add(file2);
+            }
+        }
+
+        // Additionally, handle files that were absent at the split point but exist in both branches.
+        // If their contents differ, this is a conflict.
+        for (String file : givenMap.keySet()) {
+            if (!splitMap.containsKey(file) && headMap.containsKey(file)) {
+                if (!headMap.get(file).equals(givenMap.get(file))) {
+                    handleConflicts(file, headMap, givenMap);
+                    hasConflicts = true;
+                    File file2 = Utils.join(Repository.CWD, file);
+                    stageArea.add(file2);
+                }
             }
         }
         return hasConflicts;
