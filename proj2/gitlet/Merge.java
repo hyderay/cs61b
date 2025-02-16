@@ -92,20 +92,39 @@ public class Merge {
         String givenContent = "";
         String headBlobID = current.get(file);
         String givenBlobID = given.get(file);
+
+        // Get HEAD side’s content
         if (headBlobID != null) {
-            File headBlobFile = Utils.join(Repository.getObjectsDir(), headBlobID);
-            Blobs headBlob = Utils.readObject(headBlobFile, Blobs.class);
-            headContent = headBlob.getContent();
+            File headBlobFile = join(Repository.getObjectsDir(), headBlobID);
+            Blobs headBlob = readObject(headBlobFile, Blobs.class);
+            // Strip trailing whitespace here:
+            headContent = headBlob.getContent().stripTrailing();
         }
+
+        // Get given side’s content
         if (givenBlobID != null) {
-            File givenBlobFile = Utils.join(Repository.getObjectsDir(), givenBlobID);
-            Blobs givenBlob = Utils.readObject(givenBlobFile, Blobs.class);
-            givenContent = givenBlob.getContent();
+            File givenBlobFile = join(Repository.getObjectsDir(), givenBlobID);
+            Blobs givenBlob = readObject(givenBlobFile, Blobs.class);
+            // Strip trailing whitespace here:
+            givenContent = givenBlob.getContent().stripTrailing();
         }
-        String content = "<<<<<<< HEAD\n" + headContent
-                + "\n=======\n" + givenContent
-                + "\n>>>>>>>";
-        File conflictFile = Utils.join(Repository.CWD, file);
+
+        // Now build the conflict string
+        String content;
+        if (givenContent.isEmpty()) {
+            content = "<<<<<<< HEAD\n"
+                    + headContent + "\n"
+                    + "=======\n"
+                    + ">>>>>>>";
+        } else {
+            content = "<<<<<<< HEAD\n"
+                    + headContent + "\n"
+                    + "=======\n"
+                    + givenContent + "\n"
+                    + ">>>>>>>";
+        }
+
+        File conflictFile = join(Repository.CWD, file);
         writeContents(conflictFile, content);
     }
 
