@@ -60,7 +60,7 @@ public class MyUtils {
         if (Repository.isHeadDetached()) {
             return null;
         }
-        return readContentsAsString(Repository.getHeadFile()).trim();
+        return readContentsAsString(Repository.getHeadFile());
     }
 
     public static boolean isStaged(File file) {

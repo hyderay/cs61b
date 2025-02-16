@@ -21,7 +21,7 @@ public class Merge {
         }
 
         Commit currCommit = MyUtils.getHeadCommit();
-        String givenID = Utils.readContentsAsString(branchFile).trim();
+        String givenID = Utils.readContentsAsString(branchFile);
         Commit givenCommit = Utils.readObject(MyUtils.toCommitPath(givenID), Commit.class);
         MyUtils.checkUntrackedFiles(currCommit, givenCommit);
 
@@ -96,7 +96,7 @@ public class Merge {
             }
 
             // (4) Otherwise => conflict
-            if (!Objects.equals(curHash, givHash)) {
+            if (!curSameGiv) {
                 conflict = true;
                 resolveConflict(file, curHash, givHash, stage);
             }
@@ -123,8 +123,20 @@ public class Merge {
 
     private static void resolveConflict(String file,
                                         String curHash, String givHash, Staging stage) {
-        String curContent = (curHash == null) ? "" : readContent(curHash);
-        String givContent = (givHash == null) ? "" : readContent(givHash);
+        String curContent;
+        if (curHash == null) {
+            curContent = "";
+        } else {
+            curContent = readContent(curHash);
+        }
+
+        String givContent;
+        if (givHash == null) {
+            givContent = "";
+        } else {
+            givContent = readContent(givHash);
+        }
+
         String conflictText = "<<<<<<< HEAD\n"
                 + curContent
                 + "=======\n"
