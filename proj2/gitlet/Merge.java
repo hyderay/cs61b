@@ -13,68 +13,42 @@ public class Merge {
         if (!stageArea.getStagedFiles().isEmpty() || !stageArea.getRemovedFiles().isEmpty()) {
             exit("You have uncommitted changes.");
         }
+
         /** Handle branch name doesn't exist. */
         File branchFile = getBranchFile(branchName);
         if (!branchFile.exists()) {
             exit("A branch with that name does not exist.");
         }
+
         /** Handle merge current branch. */
-        String headCommitID = readContentsAsString(Repository.getHeadFile());
+        String headCommitID = Repository.getHeadCommitID();
         String givenCommitID = readContentsAsString(branchFile);
         if (headCommitID.equals(givenCommitID)) {
             exit("Cannot merge a branch with itself.");
         }
+
         Commit headCommit = readObject(toCommitPath(headCommitID), Commit.class);
         Commit givenCommit = readObject(toCommitPath(givenCommitID), Commit.class);
         Commit splitPointCommit = findSplitPoint(headCommit, givenCommit);
+
         /** Split point is the same commit as the given branch. */
         if (splitPointCommit.getCommitID().equals(givenCommitID)) {
             exit("Given branch is an ancestor of the current branch.");
         }
+
         /** Split point is the current branch. */
         if (splitPointCommit.getCommitID().equals(headCommitID)) {
             Checkout.checkoutBranch(branchName);
             exit("Current branch fast-forwarded.");
         }
+
         HashMap<String, String> headMap = headCommit.getBlobFiles();
         HashMap<String, String> givenMap = givenCommit.getBlobFiles();
         HashMap<String, String> splitMap = splitPointCommit.getBlobFiles();
-        boolean hasConflicts = false;
 
-        /** Files that are only in given branch but don't exist in split point. */
-        for (String file : givenMap.keySet()) {
-            if (!splitMap.containsKey(file) && !headMap.containsKey(file)) {
-                Checkout.checkoutFileFromCommit(givenCommitID, file);
-                File file2 = Utils.join(Repository.CWD, file);
-                stageArea.add(file2);
-            }
-        }
+        checkBranch(givenMap, headMap, splitMap, givenCommitID);
 
-        /** Files presented in split point to determined whether being modified. */
-        for (String file : splitMap.keySet()) {
-            boolean modifiedCurrent = !headMap.getOrDefault(file, "").equals(splitMap.get(file));
-            boolean modifiedGiven = !givenMap.getOrDefault(file, "").equals(splitMap.get(file));
-            if (!modifiedCurrent && givenMap.get(file) == null) {
-                File file2 = Utils.join(Repository.CWD, file);
-                stageArea.remove(file2);
-            } else if (!modifiedCurrent && modifiedGiven) {
-                Checkout.checkoutFileFromCommit(givenCommitID, file);
-                File file2 = Utils.join(Repository.CWD, file);
-                stageArea.add(file2);
-            } else if (modifiedCurrent && modifiedGiven) {
-                if (!givenMap.getOrDefault(file, "")
-                        .equals(headMap.getOrDefault(file, ""))) {
-                    handleConflicts(file, headMap, givenMap);
-                    hasConflicts = true;
-                }
-            } else if (modifiedCurrent && givenMap.get(file) == null) {
-                handleConflicts(file, headMap, givenMap);
-                hasConflicts = true;
-            } else if (modifiedGiven && headMap.get(file) == null) {
-                handleConflicts(file, headMap, givenMap);
-                hasConflicts = true;
-            }
-        }
+        boolean hasConflicts = checkModifiedFiles(splitMap, headMap, givenMap, givenCommitID);
 
         String splitPointCommitID = splitPointCommit.getCommitID();
         if (!splitPointCommitID.equals(headCommitID) || !splitPointCommitID.equals(givenCommitID)) {
@@ -114,7 +88,7 @@ public class Merge {
     private static void handleConflicts(String file, HashMap<String, String> current,
                                         HashMap<String, String> given) {
         String content = "<<<<<<< HEAD\n" + current.getOrDefault(file, "")
-                + "\n=======\n" + given.getOrDefault(file, "") + "\n>>>>>>\n";
+                + "\n=======\n" + given.getOrDefault(file, "") + "\n>>>>>>>\n";
         File file2 = Utils.join(Repository.CWD, file);
         writeContents(file2, content);
         Staging sta = new Staging();
@@ -140,5 +114,56 @@ public class Merge {
         // Create merge commit with both parents.
         new Commit(message, headCommitID, givenCommitID, blobFile);
         stagingArea.clear();
+    }
+
+    /** Files that are only in given branch but don't exist in split point. */
+    private static void checkBranch(HashMap<String, String> givenMap,
+                                    HashMap<String, String> headMap,
+                                    HashMap<String, String> splitMap,
+                                    String givenCommitID) {
+        Staging stageArea = new Staging();
+        for (String file : givenMap.keySet()) {
+            if (!splitMap.containsKey(file) && !headMap.containsKey(file)) {
+                Checkout.checkoutFileFromCommit(givenCommitID, file);
+                File file2 = Utils.join(Repository.CWD, file);
+                stageArea.add(file2);
+            }
+        }
+    }
+
+    /** Files presented in split point to determined whether being modified. */
+    private static boolean checkModifiedFiles(HashMap<String, String> splitMap,
+                                              HashMap<String, String> headMap,
+                                              HashMap<String, String> givenMap,
+                                              String givenCommitID) {
+        Staging stageArea = new Staging();
+        boolean hasConflicts = false;
+
+        for (String file : splitMap.keySet()) {
+            boolean modifiedCurrent = !headMap.getOrDefault(file, "").equals(splitMap.get(file));
+            boolean modifiedGiven = !givenMap.getOrDefault(file, "").equals(splitMap.get(file));
+
+            if (!modifiedCurrent && givenMap.get(file) == null) {
+                File file2 = Utils.join(Repository.CWD, file);
+                stageArea.remove(file2);
+            } else if (!modifiedCurrent && modifiedGiven) {
+                Checkout.checkoutFileFromCommit(givenCommitID, file);
+                File file2 = Utils.join(Repository.CWD, file);
+                stageArea.add(file2);
+            } else if (modifiedCurrent && modifiedGiven) {
+                if (!givenMap.getOrDefault(file, "")
+                        .equals(headMap.getOrDefault(file, ""))) {
+                    handleConflicts(file, headMap, givenMap);
+                    hasConflicts = true;
+                }
+            } else if (modifiedCurrent && givenMap.get(file) == null) {
+                handleConflicts(file, headMap, givenMap);
+                hasConflicts = true;
+            } else if (modifiedGiven && headMap.get(file) == null) {
+                handleConflicts(file, headMap, givenMap);
+                hasConflicts = true;
+            }
+        }
+        return hasConflicts;
     }
 }

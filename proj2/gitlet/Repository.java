@@ -182,18 +182,18 @@ public class Repository {
     }
 
     public static boolean isHeadDetached() {
-        String headContent = readContentsAsString(HEAD_FILE);
+        String headContent = readContentsAsString(HEAD_FILE).trim();
         File branchFile = new File(Repository.getRefsDir(), headContent);
         return !branchFile.exists();
     }
 
     public static String getHeadCommitID() {
-        String headContent = readContentsAsString(HEAD_FILE);
+        String headContent = readContentsAsString(HEAD_FILE).trim();
         if (isHeadDetached()) {
             return headContent; // Direct commit ID
         } else {
             File branchFile = new File(Repository.getRefsDir(), headContent);
-            return readContentsAsString(branchFile);
+            return readContentsAsString(branchFile).trim();
         }
     }
 }
