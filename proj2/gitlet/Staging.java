@@ -69,7 +69,7 @@ public class Staging implements Serializable {
     }
 
     /** Save the staging area to disk. */
-    private void save() {
+    public void save() {
         writeObject(STAGING_FILE, this);
     }
 

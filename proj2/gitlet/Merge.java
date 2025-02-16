@@ -1,232 +1,178 @@
 package gitlet;
 
 import java.io.File;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Stack;
-import java.util.HashMap;
+import java.util.*;
 
-import static gitlet.Utils.*;
-import static gitlet.MyUtils.*;
-
-/** The Merge class implements the merge command. */
+/** Handles the 'merge' command. */
 public class Merge {
 
-    /** Merges the branch with the given name into the current branch. */
+    /** Merges BRANCHNAME into the current branch. */
     public static void merge(String branchName) {
-        // Check for uncommitted changes.
-        Staging staging = new Staging();
-        if (!staging.getStagedFiles().isEmpty() || !staging.getRemovedFiles().isEmpty()) {
-            exit("You have uncommitted changes.");
+        // 1) Preliminary checks.
+        Staging stage = new Staging();
+        if (!stage.getStagedFiles().isEmpty() || !stage.getRemovedFiles().isEmpty()) {
+            MyUtils.exit("You have uncommitted changes.");
         }
-
-        // Check that the given branch exists.
-        File branchFile = getBranchFile(branchName);
+        File branchFile = MyUtils.getBranchFile(branchName);
         if (!branchFile.exists()) {
-            exit("A branch with that name does not exist.");
+            MyUtils.exit("A branch with that name does not exist.");
         }
-
-        // Check that the user is not attempting to merge the branch with itself.
-        String currentBranch = getCurrentBranchName();
+        String currentBranch = MyUtils.getCurrentBranchName();
         if (branchName.equals(currentBranch)) {
-            exit("Cannot merge a branch with itself.");
+            MyUtils.exit("Cannot merge a branch with itself.");
         }
+        // Get commits.
+        Commit currCommit = MyUtils.getHeadCommit();
+        String givenID = Utils.readContentsAsString(branchFile).trim();
+        Commit givenCommit = Utils.readObject(MyUtils.toCommitPath(givenID), Commit.class);
 
-        // Get the current commit and the commit at the head of the given branch.
-        Commit currentCommit = getHeadCommit();
-        String givenCommitID = readContentsAsString(branchFile).trim();
-        Commit givenCommit = readObject(toCommitPath(givenCommitID), Commit.class);
+        // Check for untracked files that would be overwritten or deleted by merge.
+        MyUtils.checkUntrackedFiles(currCommit, givenCommit);
 
-        // Check for untracked files that would be overwritten.
-        checkUntrackedFiles(currentCommit, givenCommit);
+        // 2) Find split point (the latest common ancestor).
+        String splitID = findSplitPoint(currCommit.getCommitID(), givenCommit.getCommitID());
+        Commit splitCommit = Utils.readObject(MyUtils.toCommitPath(splitID), Commit.class);
 
-        // Compute the split point (latest common ancestor) of the two commits.
-        Commit splitCommit = getSplitPoint(currentCommit, givenCommit);
-
-        // If the given branch is an ancestor of the current branch, do nothing.
-        if (splitCommit.getCommitID().equals(givenCommit.getCommitID())) {
-            exit("Given branch is an ancestor of the current branch.");
+        // 3) Trivial cases.
+        if (splitID.equals(givenCommit.getCommitID())) {
+            MyUtils.exit("Given branch is an ancestor of the current branch.");
         }
-        // If the split point is the current commit, fast-forward.
-        if (splitCommit.getCommitID().equals(currentCommit.getCommitID())) {
+        if (splitID.equals(currCommit.getCommitID())) {
+            // Fast-forward: just check out given branch.
             Checkout.checkoutBranch(branchName);
-            System.out.println("Current branch fast-forwarded.");
-            return;
+            MyUtils.exit("Current branch fast-forwarded.");
         }
 
-        // Process each file in the union of files tracked by the split, current, and given commits.
-        Set<String> allFiles = new HashSet<>();
-        allFiles.addAll(splitCommit.getBlobFiles().keySet());
-        allFiles.addAll(currentCommit.getBlobFiles().keySet());
-        allFiles.addAll(givenCommit.getBlobFiles().keySet());
+        // 4) Do the merge logic.
+        boolean conflict = mergeFiles(splitCommit, currCommit, givenCommit);
 
-        boolean conflictOccurred = false;
+        // 5) Commit automatically if not trivial.
+        String msg = "Merged " + branchName + " into " + currentBranch + ".";
+        HashMap<String, String> mergedBlobs =
+                new HashMap<>(MyUtils.getHeadCommit().getBlobFiles());
+        // The new commit has two parents: current branch HEAD + given branch HEAD.
+        new Commit(msg, currCommit.getCommitID(), givenCommit.getCommitID(), mergedBlobs);
 
-        for (String fileName : allFiles) {
-            String sBlob = splitCommit.getFileHash(fileName);    // Blob ID in split point (may be null)
-            String cBlob = currentCommit.getFileHash(fileName);    // Blob ID in current branch (may be null)
-            String gBlob = givenCommit.getFileHash(fileName);      // Blob ID in given branch (may be null)
-
-            // Case 1: File unchanged in current (cBlob equals split) but modified in given.
-            if (sBlob != null && sBlob.equals(cBlob) && gBlob != null && !gBlob.equals(sBlob)) {
-                checkoutFileFromBlob(gBlob, fileName);
-                staging.add(join(Repository.CWD, fileName));
-            }
-            // Case 2: File unchanged in given (gBlob equals split) but modified in current:
-            // (do nothing; keep current version)
-            else if (sBlob != null && sBlob.equals(gBlob) && cBlob != null && !cBlob.equals(sBlob)) {
-                // Do nothing.
-            }
-            // Case 3: File not present in split and present only in given branch.
-            else if (sBlob == null && cBlob == null && gBlob != null) {
-                checkoutFileFromBlob(gBlob, fileName);
-                staging.add(join(Repository.CWD, fileName));
-            }
-            // Case 4: File present in split, unmodified in current, but removed in given.
-            else if (sBlob != null && sBlob.equals(cBlob) && gBlob == null) {
-                File target = join(Repository.CWD, fileName);
-                if (target.exists()) {
-                    restrictedDelete(target);
-                }
-                staging.getRemovedFiles().put(fileName, sBlob);
-            }
-            // Case 5: File present in split, unmodified in given, and removed in current.
-            else if (sBlob != null && sBlob.equals(gBlob) && cBlob == null) {
-                // Do nothing.
-            }
-            // Case 6: File modified in both branches in the same way.
-            else if (cBlob != null && gBlob != null && cBlob.equals(gBlob)) {
-                // Do nothing.
-            }
-            // Case 7: Conflict—files have been modified differently.
-            else {
-                conflictOccurred = true;
-                String currentContent = (cBlob != null) ? getBlobContent(cBlob) : "";
-                String givenContent = (gBlob != null) ? getBlobContent(gBlob) : "";
-                String conflictContent = "<<<<<<< HEAD\n" + currentContent
-                        + "=======\n" + givenContent + ">>>>>>>\n";
-                File target = join(Repository.CWD, fileName);
-                writeContents(target, conflictContent);
-                staging.add(target);
-            }
-        }
-
-        // Build the blobFiles map for the new merge commit by starting with current commit's blobs,
-        // then applying staged additions and removals.
-        HashMap<String, String> mergedBlobFiles = new HashMap<>(currentCommit.getBlobFiles());
-        for (String fileName : staging.getStagedFiles().keySet()) {
-            mergedBlobFiles.put(fileName, staging.getStagedFiles().get(fileName));
-        }
-        for (String fileName : staging.getRemovedFiles().keySet()) {
-            mergedBlobFiles.remove(fileName);
-        }
-
-        String mergeMessage = "Merged " + branchName + " into " + currentBranch + ".";
-        // Create a merge commit with two parents.
-        new Commit(mergeMessage, currentCommit.getCommitID(), givenCommit.getCommitID(), mergedBlobFiles);
-        staging.clear();
-
-        if (conflictOccurred) {
+        if (conflict) {
             System.out.println("Encountered a merge conflict.");
         }
     }
 
-    /** Returns the content stored in the blob with the given ID. */
-    private static String getBlobContent(String blobID) {
-        File blobFile = join(Repository.getObjectsDir(), blobID);
-        Blobs blob = readObject(blobFile, Blobs.class);
-        return blob.getContent();
-    }
-
-    /** Checks out (writes to the working directory) the file with name FILE_NAME
-     *  from the blob identified by BLOB_ID. */
-    private static void checkoutFileFromBlob(String blobID, String fileName) {
-        File blobFile = join(Repository.getObjectsDir(), blobID);
-        Blobs blob = readObject(blobFile, Blobs.class);
-        File target = join(Repository.CWD, fileName);
-        writeContents(target, blob.getContent());
-    }
-
-    /** Computes and returns the split point (latest common ancestor) of COMMITS a and b.
-     *  This implementation computes the set of all ancestor commit IDs for each branch,
-     *  then picks a candidate that is not an ancestor of any other common commit. */
-    private static Commit getSplitPoint(Commit a, Commit b) {
-        Set<String> ancestorsA = getAllAncestorIDs(a);
-        Set<String> ancestorsB = getAllAncestorIDs(b);
-        // Include the commits themselves.
-        ancestorsA.add(a.getCommitID());
-        ancestorsB.add(b.getCommitID());
-        // Find the intersection.
-        Set<String> common = new HashSet<>(ancestorsA);
-        common.retainAll(ancestorsB);
-
-        // Choose the candidate that is not an ancestor of any other candidate.
-        for (String candidateID : common) {
-            Commit candidate = readObject(toCommitPath(candidateID), Commit.class);
-            boolean isLatest = true;
-            for (String otherID : common) {
-                if (otherID.equals(candidateID)) {
-                    continue;
-                }
-                Commit other = readObject(toCommitPath(otherID), Commit.class);
-                if (isAncestor(candidate, other)) {
-                    isLatest = false;
-                    break;
-                }
-            }
-            if (isLatest) {
-                return candidate;
-            }
-        }
-        // Fallback (should not happen): return the current commit.
-        return a;
-    }
-
-    /** Returns a set of all ancestor commit IDs (reachable via parent pointers)
-     *  from the given commit. */
-    private static Set<String> getAllAncestorIDs(Commit commit) {
+    /** Returns the latest common ancestor commit ID of COMMIT1 and COMMIT2. */
+    private static String findSplitPoint(String commit1, String commit2) {
+        // Gather all ancestors (including merge parents) of commit1.
         Set<String> ancestors = new HashSet<>();
-        Stack<Commit> stack = new Stack<>();
-        stack.push(commit);
-        while (!stack.isEmpty()) {
-            Commit current = stack.pop();
-            String id = current.getCommitID();
-            if (!ancestors.contains(id)) {
-                ancestors.add(id);
-                if (current.getParent() != null) {
-                    Commit parentCommit = readObject(toCommitPath(current.getParent()), Commit.class);
-                    stack.push(parentCommit);
-                }
-                if (current.getSecondParent() != null) {
-                    Commit secondParentCommit = readObject(toCommitPath(current.getSecondParent()), Commit.class);
-                    stack.push(secondParentCommit);
-                }
-            }
-        }
-        return ancestors;
+        collectAllAncestors(commit1, ancestors);
+        // Walk up from commit2 until we find one in ancestors (the "latest" common).
+        return firstCommonAncestor(commit2, ancestors);
     }
 
-    /** Returns true if ANCESTOR is an ancestor of DESCENDANT. */
-    private static boolean isAncestor(Commit ancestor, Commit descendant) {
-        Set<String> visited = new HashSet<>();
-        Stack<Commit> stack = new Stack<>();
-        stack.push(descendant);
-        while (!stack.isEmpty()) {
-            Commit cur = stack.pop();
-            if (cur.getCommitID().equals(ancestor.getCommitID())) {
-                return true;
+    /** Recursively adds COMMIT’s ID (and all its ancestors) into SET. */
+    private static void collectAllAncestors(String commitID, Set<String> set) {
+        if (commitID == null || commitID.isEmpty() || set.contains(commitID)) {
+            return;
+        }
+        set.add(commitID);
+        Commit c = Utils.readObject(MyUtils.toCommitPath(commitID), Commit.class);
+        collectAllAncestors(c.getParent(), set);
+        collectAllAncestors(c.getSecondParent(), set);
+    }
+
+    /** Moves upward from COMMITID until finding one in ANCESTORS. */
+    private static String firstCommonAncestor(String commitID, Set<String> ancestors) {
+        // BFS or simple stack-based approach.
+        Queue<String> queue = new LinkedList<>();
+        queue.add(commitID);
+        while (!queue.isEmpty()) {
+            String curr = queue.poll();
+            if (ancestors.contains(curr)) {
+                return curr;
             }
-            if (cur.getParent() != null && !visited.contains(cur.getParent())) {
-                visited.add(cur.getParent());
-                Commit parent = readObject(toCommitPath(cur.getParent()), Commit.class);
-                stack.push(parent);
+            Commit c = Utils.readObject(MyUtils.toCommitPath(curr), Commit.class);
+            if (c.getParent() != null) queue.add(c.getParent());
+            if (c.getSecondParent() != null) queue.add(c.getSecondParent());
+        }
+        return commitID; // Fallback, should never happen if there's a common root.
+    }
+
+    /**
+     * Merge the files between SPLIT, CURRENT, and GIVEN commits.
+     * Returns true if a conflict occurred.
+     */
+    private static boolean mergeFiles(Commit split, Commit current, Commit given) {
+        boolean conflict = false;
+        Set<String> allFiles = new HashSet<>();
+        allFiles.addAll(split.getBlobFiles().keySet());
+        allFiles.addAll(current.getBlobFiles().keySet());
+        allFiles.addAll(given.getBlobFiles().keySet());
+
+        Staging stage = new Staging();  // We'll add to staging as we go.
+        for (String file : allFiles) {
+            String spHash = split.getFileHash(file);
+            String curHash = current.getFileHash(file);
+            String givHash = given.getFileHash(file);
+
+            boolean spSameCur = Objects.equals(spHash, curHash);
+            boolean spSameGiv = Objects.equals(spHash, givHash);
+            boolean curSameGiv = Objects.equals(curHash, givHash);
+
+            // If "modified in given but not in current since split":
+            if (spSameCur && !spSameGiv) {
+                // Checkout from given
+                checkoutAndStage(file, givHash, stage);
             }
-            if (cur.getSecondParent() != null && !visited.contains(cur.getSecondParent())) {
-                visited.add(cur.getSecondParent());
-                Commit secondParent = readObject(toCommitPath(cur.getSecondParent()), Commit.class);
-                stack.push(secondParent);
+            // If "modified in different ways -> conflict"
+            else if (!curSameGiv && !spSameCur && !spSameGiv) {
+                conflict = true;
+                resolveConflict(file, curHash, givHash, stage);
+            }
+            // If one side removed and the other changed -> conflict
+            else if (spSameCur && givHash == null && curHash != null) {
+                conflict = true;
+                resolveConflict(file, curHash, null, stage);
+            } else if (spSameGiv && curHash == null && givHash != null) {
+                conflict = true;
+                resolveConflict(file, null, givHash, stage);
             }
         }
-        return false;
+        stage.save(); // Ensure the updated staging is saved.
+        return conflict;
+    }
+
+    /** Checks out blobHash into CWD as FILE and stages it. */
+    private static void checkoutAndStage(String file, String blobHash, Staging stage) {
+        if (blobHash == null) {
+            // Means we want to remove the file
+            File f = Utils.join(Repository.CWD, file);
+            if (f.exists()) {
+                Utils.restrictedDelete(f);
+            }
+            stage.remove(f);
+        } else {
+            File blobFile = Utils.join(Repository.getObjectsDir(), blobHash);
+            Blobs blob = Utils.readObject(blobFile, Blobs.class);
+            File target = Utils.join(Repository.CWD, file);
+            Utils.writeContents(target, blob.getContent());
+            stage.add(target);
+        }
+    }
+
+    /** Writes conflict markers to FILE and stages the result. */
+    private static void resolveConflict(String file,
+                                        String curHash, String givHash, Staging stage) {
+        String curContent = (curHash == null) ? "" : readContent(curHash);
+        String givContent = (givHash == null) ? "" : readContent(givHash);
+        String conflictText = "<<<<<<< HEAD\n" + curContent
+                + "=======\n" + givContent + ">>>>>>>\n";
+        File target = Utils.join(Repository.CWD, file);
+        Utils.writeContents(target, conflictText);
+        stage.add(target);
+    }
+
+    /** Helper to read blob content by BLOBHASH. */
+    private static String readContent(String blobHash) {
+        File blobFile = Utils.join(Repository.getObjectsDir(), blobHash);
+        Blobs blob = Utils.readObject(blobFile, Blobs.class);
+        return blob.getContent();
     }
 }
