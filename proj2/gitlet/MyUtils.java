@@ -1,5 +1,6 @@
 package gitlet;
 import java.io.File;
+import java.util.List;
 
 import static gitlet.Utils.*;
 
@@ -82,5 +83,19 @@ public class MyUtils {
             throw new IllegalArgumentException("not .gitlet working directory");
         }
         return file.delete();
+    }
+
+    public static void checkUntrackedFiles(Commit currentCommit, Commit newCommit) {
+        List<String> cwdFiles = plainFilenamesIn(Repository.CWD);
+        for (String file : cwdFiles) {
+            // A file is considered untracked if it is not in the current commit,
+            // but it is tracked in the new commit.
+            boolean isTrackedInCurrent = currentCommit.getBlobFiles().containsKey(file);
+            boolean existsInNew = newCommit.getBlobFiles().containsKey(file);
+            if (!isTrackedInCurrent && existsInNew) {
+                exit("There is an untracked file in the way;"
+                        + " delete it, or add and commit it first.");
+            }
+        }
     }
 }

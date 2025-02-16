@@ -30,6 +30,7 @@ public class Merge {
         Commit headCommit = readObject(toCommitPath(headCommitID), Commit.class);
         Commit givenCommit = readObject(toCommitPath(givenCommitID), Commit.class);
         Commit splitPointCommit = findSplitPoint(headCommit, givenCommit);
+        checkUntrackedFiles(headCommit, givenCommit);
 
         /** Split point is the same commit as the given branch. */
         if (splitPointCommit.getCommitID().equals(givenCommitID)) {
@@ -189,8 +190,6 @@ public class Merge {
             }
         }
 
-        // Additionally, handle files that were absent at the split point but exist in both branches.
-        // If their contents differ, this is a conflict.
         for (String file : givenMap.keySet()) {
             if (!splitMap.containsKey(file) && headMap.containsKey(file)) {
                 if (!headMap.get(file).equals(givenMap.get(file))) {
