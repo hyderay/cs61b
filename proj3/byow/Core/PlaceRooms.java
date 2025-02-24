@@ -3,6 +3,8 @@ package byow.Core;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class PlaceRooms {
@@ -13,8 +15,9 @@ public class PlaceRooms {
      * @param numRooms
      * @param minRoomSize
      * @param maxRoomSize
+     * @return                  A list contains all the rooms that are placed.
      * */
-    public static void placeRooms(TETile[][] world,
+    public static List<Room> placeRooms(TETile[][] world,
                                   Random random,
                                   int numRooms,
                                   int minRoomSize,
@@ -25,6 +28,8 @@ public class PlaceRooms {
         int placed = 0;
         int attempts = 0;
         int maxAttempts = numRooms * 10;
+
+        List<Room> rooms = new ArrayList<>();
 
         while (placed < numRooms && attempts < maxAttempts) {
             attempts++;
@@ -38,8 +43,11 @@ public class PlaceRooms {
             if (canPlaceRoom(world, x, y, roomWidth, roomHeight)) {
                 placeSingleRoom(world, x, y, roomWidth, roomHeight);
                 placed++;
+                Room newRoom = new Room(x, y, roomWidth, roomHeight);
+                rooms.add(newRoom);
             }
         }
+        return rooms;
     }
 
     /**
