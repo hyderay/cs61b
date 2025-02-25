@@ -1,8 +1,9 @@
-package byow.Core;
+package byow.Core.Test;
 
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
+import byow.Core.PlaceRooms;
 
 import java.util.Random;
 
@@ -29,9 +30,9 @@ public class StudentTests {
 
     public static void testPlaceRoom(TETile[][] world) {
         Random random = new Random(1234);
-        int numRooms = 8;
+        int numRooms = 15;
         int minRoomSize = 5;
-        int maxRoomSize = 10;
+        int maxRoomSize = 15;
 
         PlaceRooms.placeRooms(world, random, numRooms,
                 minRoomSize, maxRoomSize);
