@@ -2,6 +2,10 @@ package byow.Core;
 
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
+import byow.TileEngine.Tileset;
+
+import java.util.List;
+import java.util.Random;
 
 public class Engine {
     TERenderer ter = new TERenderer();
@@ -38,15 +42,57 @@ public class Engine {
      * @return the 2D TETile[][] representing the state of the world
      */
     public TETile[][] interactWithInputString(String input) {
-        // TODO: Fill out this method so that it run the engine using the input
         // passed in as an argument, and return a 2D tile representation of the
         // world that would have been drawn if the same inputs had been given
         // to interactWithKeyboard().
         //
         // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
         // that works for many different input types.
-
+        input = input.toLowerCase();
         TETile[][] finalWorldFrame = null;
+
+        int i = 0;
+        while (i < input.length()) {
+            char c = input.charAt(i);
+
+            switch (c) {
+                case 'n':
+                    int j = i + 1;
+                    while (input.charAt(j) != 's') {
+                        j++;
+                    }
+                    String seedS = input.substring(i + 1, j);
+                    int seed = Integer.parseInt(seedS);
+                    finalWorldFrame = generateNewWorld(seed);
+                    i = j + 1;
+                    break;
+                default:
+                    i++;
+            }
+        }
+
         return finalWorldFrame;
+    }
+
+    private static TETile[][] generateNewWorld(int seed) {
+        Random random = new Random(seed);
+        TETile[][] world = new TETile[WIDTH][HEIGHT];
+
+        for (int x = 0; x < WIDTH; x++) {
+            for (int y = 0; y < HEIGHT; y++) {
+                world[x][y] = Tileset.NOTHING;
+            }
+        }
+
+        int numRooms = 16;
+        int minRoomSize = 4;
+        int maxRoomSize = 14;
+
+        List<Room> rooms = PlaceRooms.placeRooms(world, random, numRooms,
+                minRoomSize, maxRoomSize);
+
+        ConnectRooms.connectRooms(world, rooms);
+
+        return world;
     }
 }
