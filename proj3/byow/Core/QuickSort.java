@@ -6,27 +6,32 @@ public class QuickSort {
     public static void quickSort(List<Edge> edges, int low, int high) {
         if (low < high) {
             int pivotIndex = partition(edges, low, high);
-            quickSort(edges, low, pivotIndex - 1);
+            quickSort(edges, low, pivotIndex);
             quickSort(edges, pivotIndex + 1, high);
         }
     }
 
     private static int partition(List<Edge> edges, int low, int high) {
         double pivot = edges.get(low).getWeight();
-        int left = low;
-        int right = high;
+        int left = low - 1;
+        int right = high + 1;
 
         while (true) {
-            while (left <= high && edges.get(left).getWeight() < pivot) {
+            // Equivalent of do { left++; } while (edges.get(left) < pivot);
+            left++;
+            while (edges.get(left).getWeight() < pivot) {
                 left++;
             }
-            while (right >= low && edges.get(right).getWeight() > pivot) {
+
+            // Equivalent of do { right--; } while (edges.get(right) > pivot);
+            right--;
+            while (edges.get(right).getWeight() > pivot) {
                 right--;
             }
+
             if (left >= right) {
                 return right;
             }
-
             Collections.swap(edges, left, right);
         }
     }
