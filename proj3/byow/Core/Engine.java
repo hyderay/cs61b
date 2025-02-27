@@ -62,7 +62,7 @@ public class Engine {
                         j++;
                     }
                     String seedS = input.substring(i + 1, j);
-                    int seed = Integer.parseInt(seedS);
+                    long seed = Long.parseLong(seedS);
                     finalWorldFrame = generateNewWorld(seed);
                     i = j + 1;
                     break;
@@ -74,7 +74,7 @@ public class Engine {
         return finalWorldFrame;
     }
 
-    private static TETile[][] generateNewWorld(int seed) {
+    private static TETile[][] generateNewWorld(long seed) {
         Random random = new Random(seed);
         TETile[][] world = new TETile[WIDTH][HEIGHT];
 
