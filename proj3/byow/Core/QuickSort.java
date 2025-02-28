@@ -17,13 +17,11 @@ public class QuickSort {
         int right = high + 1;
 
         while (true) {
-            // Equivalent of do { left++; } while (edges.get(left) < pivot);
             left++;
             while (edges.get(left).getWeight() < pivot) {
                 left++;
             }
 
-            // Equivalent of do { right--; } while (edges.get(right) > pivot);
             right--;
             while (edges.get(right).getWeight() > pivot) {
                 right--;
