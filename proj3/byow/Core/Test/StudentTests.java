@@ -1,11 +1,9 @@
 package byow.Core.Test;
 
-import byow.Core.ConnectRooms;
-import byow.Core.Room;
+import byow.Core.*;
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
-import byow.Core.PlaceRooms;
 
 import java.util.List;
 import java.util.Random;
@@ -33,6 +31,7 @@ public class StudentTests {
          * */
         List<Room> rooms = testPlaceRoom(world, random);
         testConnectRoom(world, rooms);
+        testHUD(world, ter);
 
         ter.renderFrame(world);
     }
@@ -50,5 +49,10 @@ public class StudentTests {
     public static void testConnectRoom(TETile[][] world,
                                        List<Room> rooms) {
         ConnectRooms.connectRooms(world, rooms);
+    }
+
+    public static void testHUD(TETile[][] world,
+                               TERenderer ter) {
+        HUD.displayHUD(world, ter);
     }
 }
