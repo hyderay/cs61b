@@ -140,8 +140,4 @@ public class ConnectRooms {
             world[x][y + 1] = Tileset.WALL;
         }
     }
-
-    private static boolean inBounds(TETile[][] world, int x, int y) {
-        return x >= 0 && x < world.length && y >= 0 && y < world[0].length;
-    }
 }
