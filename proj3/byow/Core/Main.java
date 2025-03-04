@@ -19,6 +19,12 @@ public class Main {
 
             engine.ter.initialize(Engine.WIDTH, Engine.HEIGHT + 2);
             while (true) {
+                if (StdDraw.hasNextKeyTyped()) {
+                    char c = StdDraw.nextKeyTyped();
+                    SaveAndLoad.fullInput += c;
+                    engine.handleInput(c);
+                }
+
                 double mouseX = StdDraw.mouseX();
                 double mouseY = StdDraw.mouseY();
 

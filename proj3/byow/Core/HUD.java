@@ -17,7 +17,10 @@ public class HUD {
         }
 
         StdDraw.setPenColor(Color.WHITE);
-        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 14));
+        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 18));
         StdDraw.textLeft(1, Engine.HEIGHT + 1, description);
+
+        //Adjust the size of "#".
+        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 14));
     }
 }

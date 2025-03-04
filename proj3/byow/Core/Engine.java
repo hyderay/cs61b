@@ -3,6 +3,7 @@ package byow.Core;
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
+import edu.princeton.cs.introcs.StdDraw;
 
 import java.util.List;
 import java.util.Random;
@@ -12,12 +13,56 @@ public class Engine {
     /* Feel free to change the width and height. */
     public static final int WIDTH = 80;
     public static final int HEIGHT = 30;
+    private static TETile[][] world;
+    private static int playerX, playerY;  // Avatar’s position.
+    private static TETile record;   //Record the element before avatar comes.
+
+    // Use these to handle the “:” command logic when reading character by character.
+    private boolean colonPressed = false;
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
      * including inputs from the main menu.
      */
     public void interactWithKeyboard() {
+        MainMenu.MenuResults menuResult = MainMenu.displayMenu();
+        switch (menuResult.action) {
+            case NEW:
+                long seed = menuResult.seed;  // the typed-in seed
+                world = generateNewWorld(seed);
+                break;
+            case LOAD:
+                // Your save/load logic in SaveAndLoad
+                world = SaveAndLoad.loadWorld();
+                if (world == null) {
+                    throw new IllegalArgumentException("No saved worlds");
+                }
+                break;
+            case QUIT:
+                System.exit(0);
+                break;
+            default:
+                break;
+        }
+
+        ter.initialize(WIDTH, HEIGHT + 2);
+
+        while (true) {
+            if (StdDraw.hasNextKeyTyped()) {
+                char c = StdDraw.nextKeyTyped();
+                SaveAndLoad.fullInput += c;
+                handleInput(c);
+            }
+
+            ter.renderFrame(world);
+
+            double mouseX = StdDraw.mouseX();
+            double mouseY = StdDraw.mouseY();
+            HUD.drawHUD(world, mouseX, mouseY);
+
+            StdDraw.show();
+            StdDraw.pause(100);
+        }
     }
 
     /**
@@ -49,31 +94,36 @@ public class Engine {
         // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
         // that works for many different input types.
         input = input.toLowerCase();
-        TETile[][] finalWorldFrame = null;
 
         int i = 0;
         while (i < input.length()) {
             char c = input.charAt(i);
 
-            switch (c) {
-                case 'n':
-                    int j = i + 1;
-                    while (input.charAt(j) != 's') {
-                        j++;
-                    }
-                    String seedS = input.substring(i + 1, j);
-                    long seed = Long.parseLong(seedS);
-                    finalWorldFrame = generateNewWorld(seed);
-                    i = j + 1;
-                    break;
-                default:
-                    i++;
+            if (c == 'n') {
+                int j = i + 1;
+                while (j < input.length() && input.charAt(j) != 's') {
+                    j++;
+                }
+                String seedS = input.substring(i + 1, j);
+                long seed = Long.parseLong(seedS);
+                world = generateNewWorld(seed);
+                i = j + 1;
+                break;
+            } else {
+                i++;
             }
         }
 
-        return finalWorldFrame;
+        while (i < input.length()) {
+            char c = input.charAt(i);
+            i++;
+            handleInput(c);
+        }
+
+        return world;
     }
 
+    /** Generate a world based on seed. */
     private static TETile[][] generateNewWorld(long seed) {
         Random random = new Random(seed);
         TETile[][] world = new TETile[WIDTH][HEIGHT];
@@ -90,9 +140,60 @@ public class Engine {
 
         List<Room> rooms = PlaceRooms.placeRooms(world, random, numRooms,
                 minRoomSize, maxRoomSize);
-
         ConnectRooms.connectRooms(world, rooms);
 
+        int randRoom = random.nextInt(rooms.size());
+        Room startRoom = rooms.get(randRoom);
+        playerX = random.nextInt(startRoom.getWidth() - 2) + 1 + startRoom.getX();
+        playerY = random.nextInt(startRoom.getHeight() - 2) + 1 + startRoom.getY();
+        record = world[playerX][playerY];
+        world[playerX][playerY] = Tileset.AVATAR;
+
         return world;
+    }
+
+    /** Move the avatar dx in width and dy in height. */
+    private static void moveAvatar(int dx, int dy) {
+        int newX = playerX + dx;
+        int newY = playerY + dy;
+
+        if (!world[newX][newY].equals(Tileset.WALL)) {
+            world[playerX][playerY] = record;
+            record = world[newX][newY];
+            playerX = newX;
+            playerY = newY;
+            world[playerX][playerY] = Tileset.AVATAR;
+        }
+    }
+
+    public void handleInput(char c) {
+        c = Character.toLowerCase(c);
+        if (colonPressed) {
+            if (c == 'q') {
+                SaveAndLoad.saveWorld();
+                System.exit(0);
+            }
+            colonPressed = false;
+        } else {
+            switch (c) {
+                case 'w':
+                    moveAvatar(0, 1);
+                    break;
+                case 's':
+                    moveAvatar(0, -1);
+                    break;
+                case 'a':
+                    moveAvatar(-1, 0);
+                    break;
+                case 'd':
+                    moveAvatar(1, 0);
+                    break;
+                case ':':
+                    colonPressed = true;
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }

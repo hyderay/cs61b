@@ -84,6 +84,7 @@ public class MainMenu {
                 if (Character.isDigit(c)) {
                     seedString += c;
                 } else if (Character.toLowerCase(c) == 's') {
+                    SaveAndLoad.fullInput = "n" + seedString + "s";
                     if (seedString.length() == 0) {
                         return 0;  // default to 0
                     }
