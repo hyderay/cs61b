@@ -18,7 +18,7 @@ public class Engine {
     private static TETile record;   //Record the element before avatar comes.
 
     // Use these to handle the “:” command logic when reading character by character.
-    private boolean colonPressed = false;
+    private static boolean colonPressed = false;
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
@@ -45,24 +45,7 @@ public class Engine {
                 break;
         }
 
-        ter.initialize(WIDTH, HEIGHT + 2);
-
-        while (true) {
-            if (StdDraw.hasNextKeyTyped()) {
-                char c = StdDraw.nextKeyTyped();
-                SaveAndLoad.fullInput += c;
-                handleInput(c);
-            }
-
-            ter.renderFrame(world);
-
-            double mouseX = StdDraw.mouseX();
-            double mouseY = StdDraw.mouseY();
-            HUD.drawHUD(world, mouseX, mouseY);
-
-            StdDraw.show();
-            StdDraw.pause(100);
-        }
+        displayWorld(ter);
     }
 
     /**
@@ -166,7 +149,7 @@ public class Engine {
         }
     }
 
-    public void handleInput(char c) {
+    public static void handleInput(char c) {
         c = Character.toLowerCase(c);
         if (colonPressed) {
             if (c == 'q') {
@@ -191,9 +174,48 @@ public class Engine {
                 case ':':
                     colonPressed = true;
                     break;
+                case 'v':
+                    Vision.switchVision();
+                    break;
                 default:
                     break;
             }
+        }
+    }
+
+    public static int getPlayerX() {
+        return playerX;
+    }
+
+    public static int getPlayerY() {
+        return playerY;
+    }
+
+    public static void displayWorld(TERenderer ter) {
+        ter.initialize(WIDTH, HEIGHT + 2);
+
+        while (true) {
+            if (StdDraw.hasNextKeyTyped()) {
+                char c = StdDraw.nextKeyTyped();
+                SaveAndLoad.fullInput += c;
+                handleInput(c);
+            }
+
+            TETile[][] displayWorld;
+            if (Vision.switchStatus()) {
+                displayWorld = Vision.applyVision(world, Engine.getPlayerX(), Engine.getPlayerY());
+            } else {
+                displayWorld = world;
+            }
+
+            ter.renderFrame(displayWorld);
+
+            double mouseX = StdDraw.mouseX();
+            double mouseY = StdDraw.mouseY();
+            HUD.drawHUD(displayWorld, mouseX, mouseY);
+
+            StdDraw.show();
+            StdDraw.pause(100);
         }
     }
 }

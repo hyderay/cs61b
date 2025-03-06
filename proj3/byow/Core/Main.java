@@ -16,27 +16,7 @@ public class Main {
             Engine engine = new Engine();
             TETile[][] world = engine.interactWithInputString(args[1]);
             System.out.println(engine.toString());
-
-            engine.ter.initialize(Engine.WIDTH, Engine.HEIGHT + 2);
-            while (true) {
-                if (StdDraw.hasNextKeyTyped()) {
-                    char c = StdDraw.nextKeyTyped();
-                    SaveAndLoad.fullInput += c;
-                    engine.handleInput(c);
-                }
-
-                double mouseX = StdDraw.mouseX();
-                double mouseY = StdDraw.mouseY();
-
-                // Re-draw the world first:
-                engine.ter.renderFrame(world);
-
-                // Then draw the HUD text (mouse hover tile description):
-                HUD.drawHUD(world, mouseX, mouseY);
-
-                StdDraw.show();
-                StdDraw.pause(100);
-            }
+            Engine.displayWorld(engine.ter);
         // DO NOT CHANGE THESE LINES YET ;)
         } else if (args.length == 2 && args[0].equals("-p")) { System.out.println("Coming soon."); } 
         // DO NOT CHANGE THESE LINES YET ;)
