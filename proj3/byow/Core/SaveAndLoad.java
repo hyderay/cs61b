@@ -46,7 +46,7 @@ public class SaveAndLoad {
      */
     public static TETile[][] loadWorld() {
         if (savedWorld != null) {
-            return TETile.copyOf(savedWorld);
+            return savedWorld;
         } else if (!fullInput.isEmpty()) {
             Engine engine = new Engine();
             return engine.interactWithInputString(fullInput);

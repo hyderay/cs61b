@@ -74,12 +74,6 @@ public class Engine {
      * @return the 2D TETile[][] representing the state of the world
      */
     public TETile[][] interactWithInputString(String input) {
-        // passed in as an argument, and return a 2D tile representation of the
-        // world that would have been drawn if the same inputs had been given
-        // to interactWithKeyboard().
-        //
-        // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
-        // that works for many different input types.
         input = input.toLowerCase();
         inputStringMode = true;
         quitRequested = false;
@@ -110,6 +104,7 @@ public class Engine {
         inputStringMode = false;
         return world;
     }
+
 
     /** Generate a world based on seed. */
     private static TETile[][] generateNewWorld(long seed) {
@@ -175,11 +170,7 @@ public class Engine {
         c = Character.toLowerCase(c);
         if (colonPressed) {
             if (c == 'q') {
-                String current = SaveAndLoad.getFullInput();
-                if (current.endsWith(":q")) {
-                    current = current.substring(0, current.length() - 2);
-                    SaveAndLoad.setFullInput(current);
-                }
+                SaveAndLoad.setFullInput(SaveAndLoad.getFullInput() + ":" + c);
                 SaveAndLoad.saveWorld();
                 if (!inputStringMode) {
                     System.exit(0);
@@ -190,6 +181,7 @@ public class Engine {
             }
             colonPressed = false;
         } else {
+            SaveAndLoad.setFullInput(SaveAndLoad.getFullInput() + c);
             switch (c) {
                 case 'w':
                     moveAvatar(0, 1);
