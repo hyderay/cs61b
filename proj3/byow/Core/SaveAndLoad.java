@@ -9,7 +9,7 @@ import java.util.Scanner;
 
 public class SaveAndLoad {
     // This variable should be updated by your Engine as moves are processed.
-    public static String fullInput = "";
+    private static String fullInput = "";
     /**
      * Saves the current game state to a file in the "byow/Core/SavedGames"
      * folder within the current working directory.
@@ -66,5 +66,13 @@ public class SaveAndLoad {
             System.out.println("Error loading game state: " + e.getMessage());
         }
         return null;
+    }
+
+    public static String getFullInput() {
+        return fullInput;
+    }
+
+    public static void setFullInput(String input) {
+        fullInput = input;
     }
 }

@@ -28,9 +28,9 @@ public class Engine {
      */
     public void interactWithKeyboard() {
         MainMenu.MenuResults menuResult = MainMenu.displayMenu();
-        switch (menuResult.action) {
+        switch (menuResult.getAction()) {
             case NEW:
-                long seed = menuResult.seed;  // the typed-in seed
+                long seed = menuResult.getSeed();  // the typed-in seed
                 world = generateNewWorld(seed);
                 break;
             case LOAD:
@@ -112,7 +112,7 @@ public class Engine {
     /** Generate a world based on seed. */
     private static TETile[][] generateNewWorld(long seed) {
         Random random = new Random(seed);
-        TETile[][] world = new TETile[WIDTH][HEIGHT];
+        world = new TETile[WIDTH][HEIGHT];
 
         for (int x = 0; x < WIDTH; x++) {
             for (int y = 0; y < HEIGHT; y++) {
@@ -209,7 +209,9 @@ public class Engine {
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 char c = StdDraw.nextKeyTyped();
-                SaveAndLoad.fullInput += c;
+                String fullInput = SaveAndLoad.getFullInput();
+                fullInput += c;
+                SaveAndLoad.setFullInput(fullInput);
                 handleInput(c);
             }
 

@@ -13,11 +13,19 @@ public class MainMenu {
     }
 
     public static class MenuResults {
-        public final MenuActions action;
-        public final long seed;
+        private final MenuActions action;
+        private final long seed;
         public MenuResults(MenuActions action, long seed) {
             this.action = action;
             this.seed = seed;
+        }
+
+        public MenuActions getAction() {
+            return action;
+        }
+
+        public long getSeed() {
+            return seed;
         }
     }
 
@@ -84,7 +92,8 @@ public class MainMenu {
                 if (Character.isDigit(c)) {
                     seedString += c;
                 } else if (Character.toLowerCase(c) == 's') {
-                    SaveAndLoad.fullInput = "n" + seedString + "s";
+                    String fullInput = "n" + seedString + "s";
+                    SaveAndLoad.setFullInput(fullInput);
                     if (seedString.length() == 0) {
                         return 0;  // default to 0
                     }

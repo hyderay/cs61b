@@ -27,7 +27,7 @@ public class Vision {
      * @return          A world with vision applied
      */
     public static TETile[][] applyVision(TETile[][] world, int x, int y) {
-        int width = world.length;;
+        int width = world.length;
         int height = world[0].length;
 
         boolean[][] isVisited = new boolean[width][height];
