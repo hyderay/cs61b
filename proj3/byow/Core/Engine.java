@@ -85,7 +85,6 @@ public class Engine {
         quitRequested = false;
 
         if (input.charAt(0) == 'n') {
-            // Find the index of the seed terminator 's'
             int sIndex = input.indexOf('s');
             if (sIndex == -1) {
                 throw new IllegalArgumentException("Input must contain an 's' after the seed.");
@@ -176,6 +175,11 @@ public class Engine {
         c = Character.toLowerCase(c);
         if (colonPressed) {
             if (c == 'q') {
+                String current = SaveAndLoad.getFullInput();
+                if (current.endsWith(":q")) {
+                    current = current.substring(0, current.length() - 2);
+                    SaveAndLoad.setFullInput(current);
+                }
                 SaveAndLoad.saveWorld();
                 if (!inputStringMode) {
                     System.exit(0);
