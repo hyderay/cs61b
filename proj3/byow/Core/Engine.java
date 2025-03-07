@@ -167,7 +167,7 @@ public class Engine {
             if (c == 'q') {
                 // Quit command: do not add ':' or 'q' to fullInput.
                 SaveAndLoad.saveWorld();
-                System.exit(0);
+                return;
             } else {
                 // Not quitting: append the colon and current char.
                 fullInput = fullInput + ":" + c;
