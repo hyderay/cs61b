@@ -5,6 +5,8 @@ import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
 import edu.princeton.cs.introcs.StdDraw;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -103,6 +105,7 @@ public class Engine {
             handleInput(c);
         }
 
+        displayWorld(ter);
         return world;
     }
 
@@ -131,6 +134,23 @@ public class Engine {
         playerY = random.nextInt(startRoom.getHeight() - 2) + 1 + startRoom.getY();
         record = world[playerX][playerY];
         world[playerX][playerY] = Tileset.AVATAR;
+
+        int numSwitches = 5 + random.nextInt(6);
+        Collections.shuffle(rooms, random);
+        List<Room> switchList = new ArrayList<>();
+
+        for (int i = 0; i < numSwitches && i < rooms.size(); i++) {
+            Room r = rooms.get(i);
+            int sx, sy;
+            do {
+                sx = r.getX() + 1 + random.nextInt(r.getWidth() - 2);
+                sy = r.getY() + 1 + random.nextInt(r.getHeight() - 2);
+            } while (sx == playerX && sy == playerY);
+
+            world[sx][sy] = Tileset.LIGHT_SWITCH;
+            switchList.add(new Room(sx, sy, r.getX(), r.getY(),
+                    r.getWidth(), r.getHeight()));
+        }
 
         return world;
     }
@@ -183,14 +203,6 @@ public class Engine {
         }
     }
 
-    public static int getPlayerX() {
-        return playerX;
-    }
-
-    public static int getPlayerY() {
-        return playerY;
-    }
-
     public static void displayWorld(TERenderer ter) {
         ter.initialize(WIDTH, HEIGHT + 2);
 
@@ -203,7 +215,7 @@ public class Engine {
 
             TETile[][] displayWorld;
             if (Vision.switchStatus()) {
-                displayWorld = Vision.applyVision(world, Engine.getPlayerX(), Engine.getPlayerY());
+                displayWorld = Vision.applyVision(world, playerX, playerY);
             } else {
                 displayWorld = world;
             }
