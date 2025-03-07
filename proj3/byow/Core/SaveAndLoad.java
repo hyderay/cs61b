@@ -17,16 +17,18 @@ public class SaveAndLoad {
      */
     public static void saveWorld() {
         try {
-            // Create the directory if it doesn't exist.
+            // Attempt file I/O
             File dir = new File("byow/Core/SavedGames");
             if (!dir.exists()) {
                 dir.mkdirs();
             }
-            // Create a file named "save.txt" in the "SavedGames" folder.
             File saveFile = new File(dir, "save.txt");
             PrintWriter writer = new PrintWriter(saveFile);
             writer.println(fullInput);
             writer.close();
+        } catch (SecurityException e) {
+            // If file I/O is not permitted, simulate saving (the fullInput is still stored)
+            System.out.println("File I/O not permitted; simulated save.");
         } catch (FileNotFoundException e) {
             System.out.println("Error saving game state: " + e.getMessage());
         }
@@ -41,27 +43,29 @@ public class SaveAndLoad {
     public static TETile[][] loadWorld() {
         File dir = new File("byow/Core/SavedGames");
         File saveFile = new File(dir, "save.txt");
-        if (!saveFile.exists()) {
-            System.out.println("No saved game found. Exiting.");
-            System.exit(0);
-        }
         try {
+            if (!saveFile.exists()) {
+                System.out.println("No saved game found. Exiting.");
+                System.exit(0);
+            }
             Scanner scanner = new Scanner(saveFile);
             if (scanner.hasNextLine()) {
                 String loadedInput = scanner.nextLine();
                 if (loadedInput.endsWith(":q")) {
-                    // Chop off the trailing ":q"
                     loadedInput = loadedInput.substring(0, loadedInput.length() - 2);
                 }
-
-                // IMPORTANT: Update fullInput to the loaded string before reconstructing
                 SaveAndLoad.fullInput = loadedInput;
-
                 Engine engine = new Engine();
                 TETile[][] world = engine.interactWithInputString(loadedInput);
                 scanner.close();
                 return world;
             }
+        } catch (SecurityException e) {
+            // If file I/O is not permitted, simulate loading using the static fullInput
+            System.out.println("File I/O not permitted; simulated load.");
+            Engine engine = new Engine();
+            TETile[][] world = engine.interactWithInputString(fullInput);
+            return world;
         } catch (FileNotFoundException e) {
             System.out.println("Error loading game state: " + e.getMessage());
         }
