@@ -21,6 +21,8 @@ public class Engine {
 
     // Use these to handle the “:” command logic when reading character by character.
     private static boolean colonPressed = false;
+    private static boolean inputStringMode = false;
+    private static boolean quitRequested = false;
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
@@ -79,6 +81,7 @@ public class Engine {
         // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
         // that works for many different input types.
         input = input.toLowerCase();
+        inputStringMode = true;
 
         int i = 0;
         while (i < input.length()) {
@@ -99,13 +102,12 @@ public class Engine {
             }
         }
 
-        while (i < input.length()) {
+        while (i < input.length() && !quitRequested) {
             char c = input.charAt(i);
             i++;
             handleInput(c);
         }
-
-        //displayWorld(ter);
+        inputStringMode = false;
         return world;
     }
 
@@ -174,7 +176,12 @@ public class Engine {
         if (colonPressed) {
             if (c == 'q') {
                 SaveAndLoad.saveWorld();
-                System.exit(0);
+                if (!inputStringMode) {
+                    System.exit(0);
+                } else {
+                    quitRequested = true;
+                    return;
+                }
             }
             colonPressed = false;
         } else {
