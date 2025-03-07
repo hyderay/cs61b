@@ -167,42 +167,43 @@ public class Engine {
 
     public static void handleInput(char c) {
         c = Character.toLowerCase(c);
+        // If a colon was previously pressed, decide based on the new character.
         if (colonPressed) {
+            colonPressed = false; // Reset the flag immediately.
             if (c == 'q') {
-                SaveAndLoad.setFullInput(SaveAndLoad.getFullInput() + ":" + c);
+                // Quit command: do not add ':' or 'q' to fullInput.
                 SaveAndLoad.saveWorld();
                 if (!inputStringMode) {
                     System.exit(0);
-                } else {
-                    quitRequested = true;
-                    return;
                 }
+                quitRequested = true;
+                return;
+            } else {
+                // Not quitting: append the colon and current char.
+                SaveAndLoad.setFullInput(SaveAndLoad.getFullInput() + ":" + c);
+                executeCommand(c);
+                return;
             }
-            colonPressed = false;
+        }
+
+        // If no colon was pending.
+        if (c == ':') {
+            // Wait to see if a 'q' follows.
+            colonPressed = true;
         } else {
             SaveAndLoad.setFullInput(SaveAndLoad.getFullInput() + c);
-            switch (c) {
-                case 'w':
-                    moveAvatar(0, 1);
-                    break;
-                case 's':
-                    moveAvatar(0, -1);
-                    break;
-                case 'a':
-                    moveAvatar(-1, 0);
-                    break;
-                case 'd':
-                    moveAvatar(1, 0);
-                    break;
-                case ':':
-                    colonPressed = true;
-                    break;
-                case 'v':
-                    Vision.switchVision();
-                    break;
-                default:
-                    break;
-            }
+            executeCommand(c);
+        }
+    }
+
+    private static void executeCommand(char c) {
+        switch (c) {
+            case 'w': moveAvatar(0, 1); break;
+            case 's': moveAvatar(0, -1); break;
+            case 'a': moveAvatar(-1, 0); break;
+            case 'd': moveAvatar(1, 0); break;
+            case 'v': Vision.switchVision(); break;
+            default: break;
         }
     }
 
