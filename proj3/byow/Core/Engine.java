@@ -94,7 +94,6 @@ public class Engine {
         }
 
         for (char c : input.toCharArray()) {
-            SaveAndLoad.setFullInput(SaveAndLoad.getFullInput() + c);
             handleInput(c);
             if (quitRequested) {
                 break;
@@ -213,9 +212,6 @@ public class Engine {
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 char c = StdDraw.nextKeyTyped();
-                String fullInput = SaveAndLoad.getFullInput();
-                fullInput += c;
-                SaveAndLoad.setFullInput(fullInput);
                 handleInput(c);
             }
 
