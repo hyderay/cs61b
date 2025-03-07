@@ -82,31 +82,32 @@ public class Engine {
         // that works for many different input types.
         input = input.toLowerCase();
         inputStringMode = true;
+        quitRequested = false;
 
-        int i = 0;
-        while (i < input.length()) {
-            char c = input.charAt(i);
+        if (input.charAt(0) == 'n') {
+            // Find the index of the seed terminator 's'
+            int sIndex = input.indexOf('s');
+            if (sIndex == -1) {
+                throw new IllegalArgumentException("Input must contain an 's' after the seed.");
+            }
+            String seedS = input.substring(1, sIndex);
+            long seed = Long.parseLong(seedS);
+            world = generateNewWorld(seed);
+            SaveAndLoad.setFullInput(input.substring(0, sIndex + 1));
+            input = input.substring(sIndex + 1);
+        } else if (input.charAt(0) == 'l') {
+            world = SaveAndLoad.loadWorld();
+            input = input.substring(1);
+        }
 
-            if (c == 'n') {
-                int j = i + 1;
-                while (j < input.length() && input.charAt(j) != 's') {
-                    j++;
-                }
-                String seedS = input.substring(i + 1, j);
-                long seed = Long.parseLong(seedS);
-                world = generateNewWorld(seed);
-                i = j + 1;
+        for (char c : input.toCharArray()) {
+            SaveAndLoad.setFullInput(SaveAndLoad.getFullInput() + c);
+            handleInput(c);
+            if (quitRequested) {
                 break;
-            } else {
-                i++;
             }
         }
 
-        while (i < input.length() && !quitRequested) {
-            char c = input.charAt(i);
-            i++;
-            handleInput(c);
-        }
         inputStringMode = false;
         return world;
     }
