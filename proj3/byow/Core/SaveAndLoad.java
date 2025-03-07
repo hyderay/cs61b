@@ -41,6 +41,12 @@ public class SaveAndLoad {
      * @return the 2D TETile[][] representing the saved world state.
      */
     public static TETile[][] loadWorld() {
+        // If we have a saved game stored in fullInput, use it.
+        if (!fullInput.isEmpty()) {
+            Engine engine = new Engine();
+            return engine.interactWithInputString(fullInput);
+        }
+        // Otherwise, try file I/O (for interactive mode, perhaps)
         File dir = new File("byow/Core/SavedGames");
         File saveFile = new File(dir, "save.txt");
         try {
@@ -54,18 +60,16 @@ public class SaveAndLoad {
                 if (loadedInput.endsWith(":q")) {
                     loadedInput = loadedInput.substring(0, loadedInput.length() - 2);
                 }
-                SaveAndLoad.fullInput = loadedInput;
+                fullInput = loadedInput;
                 Engine engine = new Engine();
                 TETile[][] world = engine.interactWithInputString(loadedInput);
                 scanner.close();
                 return world;
             }
         } catch (SecurityException e) {
-            // If file I/O is not permitted, simulate loading using the static fullInput
             System.out.println("File I/O not permitted; simulated load.");
             Engine engine = new Engine();
-            TETile[][] world = engine.interactWithInputString(fullInput);
-            return world;
+            return engine.interactWithInputString(fullInput);
         } catch (FileNotFoundException e) {
             System.out.println("Error loading game state: " + e.getMessage());
         }
