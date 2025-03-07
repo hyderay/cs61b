@@ -1,21 +1,26 @@
 package byow.Core;
 
 import byow.TileEngine.TETile;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class SaveAndLoad {
-    // This variable should be updated by your Engine as moves are processed.
+    // This variable is updated as moves are processed.
     private static String fullInput = "";
+    // NEW: Save the current world state.
+    private static TETile[][] savedWorld = null;
+
     /**
      * Saves the current game state to a file in the "byow/Core/SavedGames"
      * folder within the current working directory.
      * The full input string (including the seed and moves) is saved.
      */
     public static void saveWorld() {
+        // Record the current world in our savedWorld variable.
+        savedWorld = Engine.getWorld(); // Use a getter (see note below)
+
         try {
             // Attempt file I/O
             File dir = new File("byow/Core/SavedGames");
@@ -27,7 +32,6 @@ public class SaveAndLoad {
             writer.println(fullInput);
             writer.close();
         } catch (SecurityException e) {
-            // If file I/O is not permitted, simulate saving (the fullInput is still stored)
             System.out.println("File I/O not permitted; simulated save.");
         } catch (FileNotFoundException e) {
             System.out.println("Error saving game state: " + e.getMessage());
@@ -41,12 +45,11 @@ public class SaveAndLoad {
      * @return the 2D TETile[][] representing the saved world state.
      */
     public static TETile[][] loadWorld() {
-        // If we have a saved game stored in fullInput, use it.
-        if (!fullInput.isEmpty()) {
-            Engine engine = new Engine();
-            return engine.interactWithInputString(fullInput);
+        // If we have a saved game (simulated) then just return the saved world.
+        if (!fullInput.isEmpty() && savedWorld != null) {
+            return savedWorld;
         }
-        // Otherwise, try file I/O (for interactive mode, perhaps)
+        // Otherwise, try file I/O (for interactive mode)
         File dir = new File("byow/Core/SavedGames");
         File saveFile = new File(dir, "save.txt");
         try {

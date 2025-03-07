@@ -244,4 +244,8 @@ public class Engine {
             StdDraw.pause(100);
         }
     }
+
+    public static TETile[][] getWorld() {
+        return world;
+    }
 }
