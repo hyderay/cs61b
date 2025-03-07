@@ -18,11 +18,11 @@ public class Engine {
     private static TETile[][] world;
     private static int playerX, playerY;  // Avatar’s position.
     private static TETile record;   //Record the element before avatar comes.
+    private static String fullInput = "";  // This variable is updated as moves are processed.
 
     // Use these to handle the “:” command logic when reading character by character.
     private static boolean colonPressed = false;
-    private static boolean inputStringMode = false;
-    private static boolean quitRequested = false;
+
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
@@ -75,8 +75,6 @@ public class Engine {
      */
     public TETile[][] interactWithInputString(String input) {
         input = input.toLowerCase();
-        inputStringMode = true;
-        quitRequested = false;
 
         if (input.charAt(0) == 'n') {
             int sIndex = input.indexOf('s');
@@ -86,7 +84,7 @@ public class Engine {
             String seedS = input.substring(1, sIndex);
             long seed = Long.parseLong(seedS);
             world = generateNewWorld(seed);
-            SaveAndLoad.setFullInput(input.substring(0, sIndex + 1));
+            fullInput = input.substring(0, sIndex + 1);
             input = input.substring(sIndex + 1);
         } else if (input.charAt(0) == 'l') {
             world = SaveAndLoad.loadWorld();
@@ -95,12 +93,8 @@ public class Engine {
 
         for (char c : input.toCharArray()) {
             handleInput(c);
-            if (quitRequested) {
-                break;
-            }
         }
 
-        inputStringMode = false;
         return world;
     }
 
@@ -173,14 +167,10 @@ public class Engine {
             if (c == 'q') {
                 // Quit command: do not add ':' or 'q' to fullInput.
                 SaveAndLoad.saveWorld();
-                if (!inputStringMode) {
-                    System.exit(0);
-                }
-                quitRequested = true;
-                return;
+                System.exit(0);
             } else {
                 // Not quitting: append the colon and current char.
-                SaveAndLoad.setFullInput(SaveAndLoad.getFullInput() + ":" + c);
+                fullInput = fullInput + ":" + c;
                 executeCommand(c);
                 return;
             }
@@ -191,7 +181,7 @@ public class Engine {
             // Wait to see if a 'q' follows.
             colonPressed = true;
         } else {
-            SaveAndLoad.setFullInput(SaveAndLoad.getFullInput() + c);
+            fullInput += c;
             executeCommand(c);
         }
     }
@@ -236,5 +226,13 @@ public class Engine {
 
     public static TETile[][] getWorld() {
         return world;
+    }
+
+    public static String getFullInput() {
+        return fullInput;
+    }
+
+    public static void setFullInput(String input) {
+        fullInput = input;
     }
 }

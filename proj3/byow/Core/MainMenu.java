@@ -93,7 +93,7 @@ public class MainMenu {
                     seedString += c;
                 } else if (Character.toLowerCase(c) == 's') {
                     String fullInput = "n" + seedString + "s";
-                    SaveAndLoad.setFullInput(fullInput);
+                    Engine.setFullInput(fullInput);
                     if (seedString.length() == 0) {
                         return 0;  // default to 0
                     }

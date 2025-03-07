@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 public class SaveAndLoad {
     // This variable is updated as moves are processed.
-    private static String fullInput = "";
+    private static String fullInput = Engine.getFullInput();
     // NEW: Save the current world state.
     private static TETile[][] savedWorld = null;
 
@@ -79,13 +79,5 @@ public class SaveAndLoad {
             System.out.println("Error loading game state: " + e.getMessage());
         }
         return null;
-    }
-
-    public static String getFullInput() {
-        return fullInput;
-    }
-
-    public static void setFullInput(String input) {
-        fullInput = input;
     }
 }
