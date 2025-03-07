@@ -45,9 +45,9 @@ public class SaveAndLoad {
      * @return the 2D TETile[][] representing the saved world state.
      */
     public static TETile[][] loadWorld() {
-        // If we have a saved game (simulated) then just return the saved world.
-        if (!fullInput.isEmpty() && savedWorld != null) {
-            return savedWorld;
+        if (!fullInput.isEmpty()) {
+            Engine engine = new Engine();
+            return engine.interactWithInputString(fullInput);
         }
         // Otherwise, try file I/O (for interactive mode)
         File dir = new File("byow/Core/SavedGames");
