@@ -105,7 +105,7 @@ public class Engine {
             handleInput(c);
         }
 
-        displayWorld(ter);
+        //displayWorld(ter);
         return world;
     }
 
