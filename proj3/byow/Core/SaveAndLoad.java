@@ -19,7 +19,7 @@ public class SaveAndLoad {
      */
     public static void saveWorld() {
         // Record the current world in our savedWorld variable.
-        savedWorld = Engine.getWorld(); // Use a getter (see note below)
+        savedWorld = TETile.copyOf(Engine.getWorld());
 
         try {
             // Attempt file I/O
@@ -45,7 +45,9 @@ public class SaveAndLoad {
      * @return the 2D TETile[][] representing the saved world state.
      */
     public static TETile[][] loadWorld() {
-        if (!fullInput.isEmpty()) {
+        if (savedWorld != null) {
+            return TETile.copyOf(savedWorld);
+        } else if (!fullInput.isEmpty()) {
             Engine engine = new Engine();
             return engine.interactWithInputString(fullInput);
         }
