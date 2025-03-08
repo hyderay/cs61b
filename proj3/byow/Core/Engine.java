@@ -22,6 +22,7 @@ public class Engine {
 
     // Use these to handle the “:” command logic when reading character by character.
     private static boolean colonPressed = false;
+    private static boolean isStringInput = false;
 
 
     /**
@@ -75,6 +76,7 @@ public class Engine {
      */
     public TETile[][] interactWithInputString(String input) {
         input = input.toLowerCase();
+        isStringInput = true;
 
         if (input.charAt(0) == 'n') {
             int sIndex = input.indexOf('s');
@@ -95,6 +97,7 @@ public class Engine {
             handleInput(c);
         }
 
+        isStringInput = false;
         return world;
     }
 
@@ -167,6 +170,9 @@ public class Engine {
             if (c == 'q') {
                 // Quit command: do not add ':' or 'q' to fullInput.
                 SaveAndLoad.saveWorld();
+                if (isStringInput) {
+                    return;
+                }
                 System.exit(0);
             } else {
                 // Not quitting: append the colon and current char.
