@@ -21,7 +21,6 @@ public class LightControl {
         int minY = room.getY() + 1;
         int maxY = room.getY() + room.getHeight() - 2;
 
-        // Calculate max distance based on room size to ensure light covers entire room
         int maxLightDistance = Math.max(room.getWidth(), room.getHeight());
 
         for (int x = minX; x <= maxX; x++) {
@@ -40,10 +39,10 @@ public class LightControl {
     private static TETile applyBlueLighting(TETile tile, int distance, int maxLightDistance) {
         float shadingFactor = Math.max(0, 1.0f - (distance / (float) maxLightDistance));
 
-        // Smooth and gradual blue shading
-        int blueIntensity = (int) (200 * shadingFactor) + 55; // ensures it's not completely dark
+        int blueIntensity = (int) (200 * shadingFactor) + 50;
         Color shadedColor = new Color(0, 0, blueIntensity);
 
+        // Keep original character and text color
         return new TETile(tile.character(), tile.getTextColor(), shadedColor, tile.description());
     }
 

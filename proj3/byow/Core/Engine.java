@@ -141,7 +141,6 @@ public class Engine {
             } while (sx == playerX && sy == playerY);
 
             r.setHasSwitch(true);
-            r.setLight(false);
             r.setSx(sx);
             r.setSy(sy);
             world[sx][sy] = Tileset.LIGHT_SWITCH;
@@ -156,11 +155,26 @@ public class Engine {
         int newY = playerY + dy;
 
         if (!world[newX][newY].equals(Tileset.WALL)) {
-            world[playerX][playerY] = record;
-            record = world[newX][newY];
+            world[playerX][playerY] = new TETile(
+                    record.character(),
+                    record.getTextColor(),
+                    world[playerX][playerY].getBackgroundColor(),
+                    record.description()
+            );
+
+            TETile steppedTile = world[newX][newY];
+            record = steppedTile;
             playerX = newX;
             playerY = newY;
-            world[playerX][playerY] = Tileset.AVATAR;
+
+            TETile newAvatarTile = new TETile(
+                    Tileset.AVATAR.character(),
+                    Tileset.AVATAR.getTextColor(),
+                    steppedTile.getBackgroundColor(),
+                    Tileset.AVATAR.description()
+            );
+
+            world[playerX][playerY] = newAvatarTile;
         }
     }
 
@@ -215,8 +229,6 @@ public class Engine {
                 handleInput(c);
             }
 
-            updateLightingEffects();
-
             TETile[][] displayWorld;
             if (Vision.switchStatus()) {
                 displayWorld = Vision.applyVision(world, playerX, playerY);
@@ -261,15 +273,6 @@ public class Engine {
         int sx = room.getSx();
         int sy = room.getSy();
 
-        return Math.abs(playerX - sx) + Math.abs(playerY - sy) <= 1;
-    }
-
-    /** Re-applies lighting effects to rooms every frame. */
-    private static void updateLightingEffects() {
-        for (Room r : rooms) {
-            if (r.hasSwitch()) {
-                LightControl.applyLight(r, world);
-            }
-        }
+        return px == sx && py == sy;
     }
 }

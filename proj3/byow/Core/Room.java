@@ -23,20 +23,6 @@ public class Room {
         centerY = y + height / 2;
     }
 
-    /**
-     * Store light switches.
-     * */
-    public Room(int sx, int sy,
-                int x, int y,
-                int width, int height) {
-        this.sx = sx;
-        this.sy = sy;
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-    }
-
     public void setHasSwitch(boolean hasSwitch) {
         this.hasSwitch = hasSwitch;
     }
