@@ -9,6 +9,8 @@ public class Room {
     private int height;
     private int sx;
     private int sy;
+    private boolean hasSwitch = false;
+    private boolean lightOn = false;
 
     public Room(int x, int y,
                 int width, int height) {
@@ -21,6 +23,9 @@ public class Room {
         centerY = y + height / 2;
     }
 
+    /**
+     * Store light switches.
+     * */
     public Room(int sx, int sy,
                 int x, int y,
                 int width, int height) {
@@ -30,6 +35,22 @@ public class Room {
         this.y = y;
         this.width = width;
         this.height = height;
+    }
+
+    public void setHasSwitch(boolean hasSwitch) {
+        this.hasSwitch = hasSwitch;
+    }
+
+    public boolean hasSwitch() {
+        return hasSwitch;
+    }
+
+    public boolean isLightOn() {
+        return lightOn;
+    }
+
+    public void setLight(boolean status) {
+        this.lightOn = status;
     }
 
     public int getCenterX() {
@@ -62,5 +83,13 @@ public class Room {
 
     public int getSy() {
         return sy;
+    }
+
+    public void setSx(int sx) {
+        this.sx = sx;
+    }
+
+    public void setSy(int sy) {
+        this.sy = sy;
     }
 }

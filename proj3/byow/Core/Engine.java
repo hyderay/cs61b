@@ -23,6 +23,7 @@ public class Engine {
     // Use these to handle the “:” command logic when reading character by character.
     private static boolean colonPressed = false;
     private static boolean isStringInput = false;
+    private static List<Room> rooms;
 
 
     /**
@@ -114,10 +115,10 @@ public class Engine {
         }
 
         int numRooms = 16;
-        int minRoomSize = 4;
+        int minRoomSize = 5;
         int maxRoomSize = 14;
 
-        List<Room> rooms = PlaceRooms.placeRooms(world, random, numRooms,
+        rooms = PlaceRooms.placeRooms(world, random, numRooms,
                 minRoomSize, maxRoomSize);
         ConnectRooms.connectRooms(world, rooms);
 
@@ -130,7 +131,6 @@ public class Engine {
 
         int numSwitches = 5 + random.nextInt(6);
         Collections.shuffle(rooms, random);
-        List<Room> switchList = new ArrayList<>();
 
         for (int i = 0; i < numSwitches && i < rooms.size(); i++) {
             Room r = rooms.get(i);
@@ -140,9 +140,11 @@ public class Engine {
                 sy = r.getY() + 1 + random.nextInt(r.getHeight() - 2);
             } while (sx == playerX && sy == playerY);
 
+            r.setHasSwitch(true);
+            r.setLight(false);
+            r.setSx(sx);
+            r.setSy(sy);
             world[sx][sy] = Tileset.LIGHT_SWITCH;
-            switchList.add(new Room(sx, sy, r.getX(), r.getY(),
-                    r.getWidth(), r.getHeight()));
         }
 
         return world;
@@ -199,6 +201,7 @@ public class Engine {
             case 'a': moveAvatar(-1, 0); break;
             case 'd': moveAvatar(1, 0); break;
             case 'v': Vision.switchVision(); break;
+            case 't': toggleLightSwitch(); break;
             default: break;
         }
     }
@@ -211,6 +214,8 @@ public class Engine {
                 char c = StdDraw.nextKeyTyped();
                 handleInput(c);
             }
+
+            updateLightingEffects();
 
             TETile[][] displayWorld;
             if (Vision.switchStatus()) {
@@ -240,5 +245,31 @@ public class Engine {
 
     public static void setFullInput(String input) {
         fullInput = input;
+    }
+
+    private static void toggleLightSwitch() {
+        for (Room r : rooms) {
+            if (r.hasSwitch() && isAdjacentToSwitch(r, playerX, playerY)) {
+                LightControl.toggleSwitch(r, world);
+                break;
+            }
+        }
+    }
+
+    /** Helper method to check adjacency to the switch. */
+    private static boolean isAdjacentToSwitch(Room room, int px, int py) {
+        int sx = room.getSx();
+        int sy = room.getSy();
+
+        return Math.abs(playerX - sx) + Math.abs(playerY - sy) <= 1;
+    }
+
+    /** Re-applies lighting effects to rooms every frame. */
+    private static void updateLightingEffects() {
+        for (Room r : rooms) {
+            if (r.hasSwitch()) {
+                LightControl.applyLight(r, world);
+            }
+        }
     }
 }

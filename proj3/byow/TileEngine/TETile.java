@@ -189,4 +189,12 @@ public class TETile {
 
         return copy;
     }
+
+    public Color getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public Color getTextColor() {
+        return textColor;
+    }
 }
