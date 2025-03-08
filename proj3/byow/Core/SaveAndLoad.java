@@ -7,8 +7,6 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class SaveAndLoad {
-    // This variable is updated as moves are processed.
-    private static String fullInput = Engine.getFullInput();
     // NEW: Save the current world state.
     private static TETile[][] savedWorld = null;
 
@@ -29,7 +27,7 @@ public class SaveAndLoad {
             }
             File saveFile = new File(dir, "save.txt");
             PrintWriter writer = new PrintWriter(saveFile);
-            writer.println(fullInput);
+            writer.println(Engine.getFullInput());
             writer.close();
         } catch (SecurityException e) {
             System.out.println("File I/O not permitted; simulated save.");
@@ -47,9 +45,9 @@ public class SaveAndLoad {
     public static TETile[][] loadWorld() {
         if (savedWorld != null) {
             return savedWorld;
-        } else if (!fullInput.isEmpty()) {
+        } else if (!Engine.getFullInput().isEmpty()) {
             Engine engine = new Engine();
-            return engine.interactWithInputString(fullInput);
+            return engine.interactWithInputString(Engine.getFullInput());
         }
         // Otherwise, try file I/O (for interactive mode)
         File dir = new File("byow/Core/SavedGames");
@@ -65,7 +63,7 @@ public class SaveAndLoad {
                 if (loadedInput.endsWith(":q")) {
                     loadedInput = loadedInput.substring(0, loadedInput.length() - 2);
                 }
-                fullInput = loadedInput;
+                Engine.setFullInput(loadedInput);
                 Engine engine = new Engine();
                 TETile[][] world = engine.interactWithInputString(loadedInput);
                 scanner.close();
@@ -74,7 +72,7 @@ public class SaveAndLoad {
         } catch (SecurityException e) {
             System.out.println("File I/O not permitted; simulated load.");
             Engine engine = new Engine();
-            return engine.interactWithInputString(fullInput);
+            return engine.interactWithInputString(Engine.getFullInput());
         } catch (FileNotFoundException e) {
             System.out.println("Error loading game state: " + e.getMessage());
         }
