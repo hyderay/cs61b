@@ -21,7 +21,7 @@ public class Engine {
 
     // Use these to handle the “:” command logic when reading character by character.
     private static boolean colonPressed = false;
-    private static boolean isStringInput = false;
+    private static boolean gameShouldRun = false;
     private static List<Room> rooms;
 
 
@@ -76,7 +76,6 @@ public class Engine {
      */
     public TETile[][] interactWithInputString(String input) {
         input = input.toLowerCase();
-        isStringInput = true;
 
         if (input.charAt(0) == 'n') {
             int sIndex = input.indexOf('s');
@@ -97,7 +96,6 @@ public class Engine {
             handleInput(c);
         }
 
-        isStringInput = false;
         return world;
     }
 
@@ -185,17 +183,13 @@ public class Engine {
             if (c == 'q') {
                 // Quit command: do not add ':' or 'q' to fullInput.
                 SaveAndLoad.saveWorld();
-                if (isStringInput) {
-                    return;
-                } else {
-                    System.exit(0);
-                }
+                gameShouldRun = false;
             } else {
                 // Not quitting: append the colon and current char.
                 fullInput = fullInput + ":" + c;
                 executeCommand(c);
-                return;
             }
+            return;
         }
 
         // If no colon was pending.
@@ -226,8 +220,9 @@ public class Engine {
 
     public static void displayWorld(TERenderer ter) {
         ter.initialize(WIDTH, HEIGHT + 2);
+        gameShouldRun = true;
 
-        while (true) {
+        while (gameShouldRun) {
             if (StdDraw.hasNextKeyTyped()) {
                 char c = StdDraw.nextKeyTyped();
                 handleInput(c);
@@ -249,6 +244,8 @@ public class Engine {
             StdDraw.show();
             StdDraw.pause(100);
         }
+
+        System.exit(0);
     }
 
     public static TETile[][] getWorld() {
