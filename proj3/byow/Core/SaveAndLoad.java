@@ -35,7 +35,7 @@ public class SaveAndLoad {
      * @return the 2D TETile[][] representing the saved world state.
      */
     public static TETile[][] loadWorld() {
-        File dir = new File("byow/Core/SavedGames");
+        File dir = new File("byow/SavedGames");
         File saveFile = new File(dir, "save.txt");
 
         if (!saveFile.exists()) {
