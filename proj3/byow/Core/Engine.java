@@ -23,7 +23,7 @@ public class Engine {
     private static boolean colonPressed = false;
     private static boolean gameShouldRun = false;
     private static List<Room> rooms;
-
+    private static int currentSlot = 0;
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
@@ -181,11 +181,20 @@ public class Engine {
         if (colonPressed) {
             colonPressed = false; // Reset the flag immediately.
             if (c == 'q') {
-                // Quit command: do not add ':' or 'q' to fullInput.
-                SaveAndLoad.saveWorld();
+                if (currentSlot != 0) {
+                    SaveAndLoad.saveWorldToSlot(currentSlot);
+                } else {
+                    SaveAndLoad.saveWorld(); // fallback to save.txt if we have no slot
+                }
                 gameShouldRun = false;
+            } else if (Character.isDigit(c)) {
+                int slot = Character.getNumericValue(c);
+                SaveAndLoad.saveWorldToSlot(slot);
+                // We can append ":<digit>" to the input string so the replay matches:
+                fullInput = fullInput + ":" + c;
+                // We do NOT set gameShouldRun = false, so the game continues.
             } else {
-                // Not quitting: append the colon and current char.
+                // If not 'q' or digit, we treat it as a normal command
                 fullInput = fullInput + ":" + c;
                 executeCommand(c);
             }
@@ -275,5 +284,13 @@ public class Engine {
         int sy = room.getSy();
 
         return px == sx && py == sy;
+    }
+
+    public static void setCurrentSlot(int slot) {
+        currentSlot = slot;
+    }
+
+    public static int getCurrentSlot() {
+        return currentSlot;
     }
 }

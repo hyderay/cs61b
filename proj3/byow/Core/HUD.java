@@ -20,6 +20,9 @@ public class HUD {
         StdDraw.setFont(new Font("Monaco", Font.PLAIN, 18));
         StdDraw.textLeft(1, Engine.HEIGHT + 1, description);
 
+        String slotLabel = "Slot:" + Engine.getCurrentSlot();
+        StdDraw.text(Engine.WIDTH - 3, Engine.HEIGHT + 1, slotLabel);
+
         //Adjust the size of "#".
         StdDraw.setFont(new Font("Monaco", Font.PLAIN, 14));
     }
