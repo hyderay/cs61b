@@ -208,6 +208,10 @@ public class Engine {
     }
 
     private static void executeCommand(char c) {
+        if (world == null && c != 'n' && c != 'l') {
+            return;
+        }
+
         switch (c) {
             case 'w': moveAvatar(0, 1); break;
             case 's': moveAvatar(0, -1); break;
