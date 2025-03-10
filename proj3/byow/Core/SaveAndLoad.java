@@ -1,24 +1,17 @@
 package byow.Core;
 
 import byow.TileEngine.TETile;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+
+import java.io.*;
 import java.util.Scanner;
 
 public class SaveAndLoad {
-    // NEW: Save the current world state.
-    private static TETile[][] savedWorld = null;
-
     /**
      * Saves the current game state to a file in the "byow/Core/SavedGames"
      * folder within the current working directory.
      * The full input string (including the seed and moves) is saved.
      */
     public static void saveWorld() {
-        // Record the current world in our savedWorld variable.
-        savedWorld = TETile.copyOf(Engine.getWorld());
-
         try {
             // Attempt file I/O
             File dir = new File("byow/Core/SavedGames");
@@ -26,13 +19,12 @@ public class SaveAndLoad {
                 dir.mkdirs();
             }
             File saveFile = new File(dir, "save.txt");
-            PrintWriter writer = new PrintWriter(saveFile);
-            writer.println(Engine.getFullInput());
+            FileWriter writer = new FileWriter(saveFile);
+            writer.write(Engine.getFullInput());
             writer.close();
-        } catch (SecurityException e) {
-            System.out.println("File I/O not permitted; simulated save.");
-        } catch (FileNotFoundException e) {
-            System.out.println("Error saving game state: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
         }
     }
 
@@ -43,39 +35,30 @@ public class SaveAndLoad {
      * @return the 2D TETile[][] representing the saved world state.
      */
     public static TETile[][] loadWorld() {
-        if (savedWorld != null) {
-            return savedWorld;
-        } else if (!Engine.getFullInput().isEmpty()) {
-            Engine engine = new Engine();
-            return engine.interactWithInputString(Engine.getFullInput());
-        }
-        // Otherwise, try file I/O (for interactive mode)
         File dir = new File("byow/Core/SavedGames");
         File saveFile = new File(dir, "save.txt");
-        try {
-            if (!saveFile.exists()) {
-                System.out.println("No saved game found. Exiting.");
-                System.exit(0);
-            }
-            Scanner scanner = new Scanner(saveFile);
+
+        if (!saveFile.exists()) {
+            System.out.println("No saved game found. Exiting.");
+            System.exit(0);
+        }
+
+        try (Scanner scanner = new Scanner(saveFile)) {
             if (scanner.hasNextLine()) {
                 String loadedInput = scanner.nextLine();
+                // Remove the quit command if present
                 if (loadedInput.endsWith(":q")) {
                     loadedInput = loadedInput.substring(0, loadedInput.length() - 2);
                 }
                 Engine.setFullInput(loadedInput);
                 Engine engine = new Engine();
-                TETile[][] world = engine.interactWithInputString(loadedInput);
-                scanner.close();
-                return world;
+                return engine.interactWithInputString(loadedInput);
             }
-        } catch (SecurityException e) {
-            System.out.println("File I/O not permitted; simulated load.");
-            Engine engine = new Engine();
-            return engine.interactWithInputString(Engine.getFullInput());
-        } catch (FileNotFoundException e) {
-            System.out.println("Error loading game state: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
         }
+
         return null;
     }
 }
