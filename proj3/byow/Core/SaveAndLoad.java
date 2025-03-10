@@ -14,7 +14,7 @@ public class SaveAndLoad {
     public static void saveWorld() {
         try {
             // Attempt file I/O
-            File dir = new File("byow/Core/SavedGames");
+            File dir = new File("byow/SavedGames");
             if (!dir.exists()) {
                 dir.mkdirs();
             }
