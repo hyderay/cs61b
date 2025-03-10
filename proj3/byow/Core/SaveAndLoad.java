@@ -8,25 +8,6 @@ import java.util.List;
 import java.util.Scanner;
 
 public class SaveAndLoad {
-    /**
-     * Saves the current game state to a file in the CWD.
-     * folder within the current working directory.
-     * The full input string (including the seed and moves) is saved.
-     */
-    public static void saveWorld() {
-        saveWorldToSlot(1);
-    }
-
-    /**
-     * Loads the saved game state from CWD within the current working directory.
-     * If no save file exists, the program exits gracefully.
-     *
-     * @return the 2D TETile[][] representing the saved world state.
-     */
-    public static TETile[][] loadWorld() {
-        return loadWorldFromSlot(1);
-    }
-
     public static void saveWorldToSlot(int slot) {
         try {
             File saveFile = new File("saveSlot" + slot + ".txt");
@@ -71,7 +52,6 @@ public class SaveAndLoad {
     /** Returns a list of all slot numbers (1..N) that currently have a saved file. */
     public static List<Integer> getExistingSlots() {
         List<Integer> result = new ArrayList<>();
-        // If you only want to consider slots 1..5, just loop i=1..5.
         for (int i = 1; i <= 5; i++) {
             if (slotExists(i)) {
                 result.add(i);

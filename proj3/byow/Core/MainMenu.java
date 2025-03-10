@@ -1,6 +1,5 @@
 package byow.Core;
 
-import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 import edu.princeton.cs.introcs.StdDraw;
 
@@ -126,19 +125,19 @@ public class MainMenu {
                 switch (c) {
                     case 's':
                         int slot = promptSlot();
+                        if (slot == -1) {
+                            break;
+                        }
+
                         long seed = promptSeedForSlot();
-                        Engine engine = new Engine();
-                        String newGameInput = "n" + seed + "s";
-                        engine.interactWithInputString(newGameInput);
                         Engine.setCurrentSlot(slot);
-                        SaveAndLoad.saveWorldToSlot(slot);
-                        System.out.println("Created a new game with seed " + seed +
-                                " and saved it to slot " + slot);
-                        Engine.displayWorld(new byow.TileEngine.TERenderer());
+                        TETile[][] world = Engine.generateNewWorld(seed);
+                        Engine.setFullInput("N" + seed + "S");
+                        Engine.displayWorld(world);
                         return;
                     case 'l':
                         handleLoadSlots();
-                        return;
+                        break;
                     case 'b':
                         return;
                     default:
@@ -148,62 +147,21 @@ public class MainMenu {
         }
     }
 
-
-    private static int promptSlot() {
-        String slotString = "";
-        while (true) {
-            StdDraw.clear(Color.BLACK);
-            StdDraw.setPenColor(Color.WHITE);
-            StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.70,
-                    "Enter a slot number [1-5], then press (S):");
-            StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.60, slotString);
-            StdDraw.show();
-
-            if (StdDraw.hasNextKeyTyped()) {
-                char c = StdDraw.nextKeyTyped();
-                if (Character.isDigit(c)) {
-                    slotString += c;
-                } else if (Character.toLowerCase(c) == 's') {
-                    if (slotString.isEmpty()) {
-                        return 1; // default to slot 1 if no digit typed
-                    }
-                    return Integer.parseInt(slotString);
-                }
-            }
-        }
-    }
-
-
     private static void handleLoadSlots() {
-        // This returns something like [1, 2, 4] if saveSlot1/2/4.txt exist
+        // Retrieve existing slots; for example, [1, 2, 4] if saveSlot1/2/4.txt exist
         List<Integer> existing = SaveAndLoad.getExistingSlots();
         if (existing.isEmpty()) {
-            // Show a quick message, then return
-            StdDraw.clear(Color.BLACK);
-            StdDraw.setPenColor(Color.WHITE);
-            StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.60, "No saved slots found!");
-            StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.50, "Press any key to continue.");
-            StdDraw.show();
-            waitForAnyKey();
+            displayMessageAndWait("No saved slots found!", "Press any key to continue.");
             return;
         }
 
-        // If there are slots, let the user pick one from that list:
-        // We’ll do a small loop with text.
         while (true) {
-            StdDraw.clear(Color.BLACK);
-            StdDraw.setPenColor(Color.WHITE);
-            StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.70, "Load from a slot");
-            // Show existing slots, e.g. “Existing slots: [1, 2, 4]”
-            StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.60,
-                    "Existing: " + existing.toString());
-            StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.55,
-                    "Type one of these numbers [1..5], or press (B) to go back");
-            StdDraw.show();
+            drawLoadSlotsMenu(existing);
 
             if (StdDraw.hasNextKeyTyped()) {
                 char c = StdDraw.nextKeyTyped();
-                if (c == 'b' || c == 'B') {
+                c = Character.toLowerCase(c);
+                if (c == 'b') {
                     return; // go back to Other Slots menu
                 }
                 if (Character.isDigit(c)) {
@@ -211,31 +169,48 @@ public class MainMenu {
                     if (existing.contains(chosenSlot)) {
                         TETile[][] loaded = SaveAndLoad.loadWorldFromSlot(chosenSlot);
                         if (loaded == null) {
-                            // Means the file was missing or had some error
-                            StdDraw.clear(Color.BLACK);
-                            StdDraw.setPenColor(Color.WHITE);
-                            StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.60,
-                                    "Load failed for slot " + chosenSlot);
-                            StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.50,
+                            displayMessageAndWait("Load failed for slot " + chosenSlot,
                                     "Press any key to continue");
-                            StdDraw.show();
-                            waitForAnyKey();
                         } else {
                             Engine.setCurrentSlot(chosenSlot);
-                            Engine.displayWorld(new byow.TileEngine.TERenderer());
+                            Engine.displayWorld(Engine.getWorld());
                             return;
                         }
                     } else {
-                        // pressed a digit that is not in existing
-                        StdDraw.clear(Color.BLACK);
-                        StdDraw.setPenColor(Color.WHITE);
-                        StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.60,
-                                "No saved world in slot " + chosenSlot);
-                        StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.50,
+                        displayMessageAndWait("No saved world in slot " + chosenSlot,
                                 "Press any key to continue.");
-                        StdDraw.show();
-                        waitForAnyKey();
                     }
+                }
+            }
+        }
+    }
+
+    private static int promptSlot() {
+        String slotString = "";
+        List<Integer> existing = SaveAndLoad.getExistingSlots();
+        while (true) {
+            StdDraw.clear(Color.BLACK);
+            StdDraw.setPenColor(Color.WHITE);
+            StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.70,
+                    "Enter a slot number [1-5], then press (S). To go back (B)");
+            StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.65,
+                    "To go back press (B)");
+            StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.60, "Existing: " + existing);
+            StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.55, slotString);
+            StdDraw.show();
+
+            if (StdDraw.hasNextKeyTyped()) {
+                char c = StdDraw.nextKeyTyped();
+                c = Character.toLowerCase(c);
+                if (Character.isDigit(c)) {
+                    slotString += c;
+                } else if (c == 'b') {
+                    return -1;
+                } else if (c == 's') {
+                    if (slotString.isEmpty()) {
+                        return 1; // default to slot 1 if no digit typed
+                    }
+                    return Integer.parseInt(slotString);
                 }
             }
         }
@@ -266,9 +241,10 @@ public class MainMenu {
 
             if (StdDraw.hasNextKeyTyped()) {
                 char c = StdDraw.nextKeyTyped();
+                c = Character.toLowerCase(c);
                 if (Character.isDigit(c)) {
                     seedString += c;
-                } else if (Character.toLowerCase(c) == 's') {
+                } else if (c == 's') {
                     // If no digits typed, default to 0
                     if (seedString.isEmpty()) {
                         seedString = "0";
@@ -280,4 +256,22 @@ public class MainMenu {
         }
     }
 
+    private static void displayMessageAndWait(String message, String subMessage) {
+        StdDraw.clear(Color.BLACK);
+        StdDraw.setPenColor(Color.WHITE);
+        StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.60, message);
+        StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.50, subMessage);
+        StdDraw.show();
+        waitForAnyKey();
+    }
+
+    private static void drawLoadSlotsMenu(List<Integer> existing) {
+        StdDraw.clear(Color.BLACK);
+        StdDraw.setPenColor(Color.WHITE);
+        StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.70, "Load from a slot");
+        StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.60, "Existing: " + existing.toString());
+        StdDraw.text(MENU_WIDTH / 2.0, MENU_HEIGHT * 0.55,
+                "Type one of these numbers, or press (B) to go back");
+        StdDraw.show();
+    }
 }

@@ -23,7 +23,7 @@ public class Engine {
     private static boolean colonPressed = false;
     private static boolean gameShouldRun = false;
     private static List<Room> rooms;
-    private static int currentSlot = 0;
+    private static int currentSlot = 1;
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
@@ -38,7 +38,7 @@ public class Engine {
                 break;
             case LOAD:
                 // Your save/load logic in SaveAndLoad
-                world = SaveAndLoad.loadWorld();
+                world = SaveAndLoad.loadWorldFromSlot(1);
                 if (world == null) {
                     throw new IllegalArgumentException("No saved worlds");
                 }
@@ -50,7 +50,7 @@ public class Engine {
                 break;
         }
 
-        displayWorld(ter);
+        displayWorld(world);
     }
 
     /**
@@ -88,7 +88,7 @@ public class Engine {
             fullInput = input.substring(0, sIndex + 1);
             input = input.substring(sIndex + 1);
         } else if (input.charAt(0) == 'l') {
-            world = SaveAndLoad.loadWorld();
+            world = SaveAndLoad.loadWorldFromSlot(1);
             input = input.substring(1);
         }
 
@@ -101,7 +101,7 @@ public class Engine {
 
 
     /** Generate a world based on seed. */
-    private static TETile[][] generateNewWorld(long seed) {
+    public static TETile[][] generateNewWorld(long seed) {
         Random random = new Random(seed);
         world = new TETile[WIDTH][HEIGHT];
 
@@ -181,18 +181,8 @@ public class Engine {
         if (colonPressed) {
             colonPressed = false; // Reset the flag immediately.
             if (c == 'q') {
-                if (currentSlot != 0) {
-                    SaveAndLoad.saveWorldToSlot(currentSlot);
-                } else {
-                    SaveAndLoad.saveWorld(); // fallback to save.txt if we have no slot
-                }
+                SaveAndLoad.saveWorldToSlot(currentSlot);
                 gameShouldRun = false;
-            } else if (Character.isDigit(c)) {
-                int slot = Character.getNumericValue(c);
-                SaveAndLoad.saveWorldToSlot(slot);
-                // We can append ":<digit>" to the input string so the replay matches:
-                fullInput = fullInput + ":" + c;
-                // We do NOT set gameShouldRun = false, so the game continues.
             } else {
                 // If not 'q' or digit, we treat it as a normal command
                 fullInput = fullInput + ":" + c;
@@ -227,7 +217,8 @@ public class Engine {
         }
     }
 
-    public static void displayWorld(TERenderer ter) {
+    public static void displayWorld(TETile[][] world) {
+        TERenderer ter = new TERenderer();
         ter.initialize(WIDTH, HEIGHT + 2);
         gameShouldRun = true;
 
