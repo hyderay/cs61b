@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class SaveAndLoad {
     /**
-     * Saves the current game state to a file in the "byow/Core/SavedGames"
+     * Saves the current game state to a file in the CWD.
      * folder within the current working directory.
      * The full input string (including the seed and moves) is saved.
      */
@@ -24,7 +24,7 @@ public class SaveAndLoad {
     }
 
     /**
-     * Loads the saved game state from "SavedGames/save.txt" within the current working directory.
+     * Loads the saved game state from CWD within the current working directory.
      * If no save file exists, the program exits gracefully.
      *
      * @return the 2D TETile[][] representing the saved world state.
