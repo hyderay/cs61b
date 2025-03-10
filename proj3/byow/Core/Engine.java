@@ -187,8 +187,9 @@ public class Engine {
                 SaveAndLoad.saveWorld();
                 if (isStringInput) {
                     return;
+                } else {
+                    System.exit(0);
                 }
-                System.exit(0);
             } else {
                 // Not quitting: append the colon and current char.
                 fullInput = fullInput + ":" + c;
