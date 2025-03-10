@@ -13,12 +13,7 @@ public class SaveAndLoad {
      */
     public static void saveWorld() {
         try {
-            // Attempt file I/O
-            File dir = new File("byow/SavedGames");
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-            File saveFile = new File(dir, "save.txt");
+            File saveFile = new File("save.txt");
             FileWriter writer = new FileWriter(saveFile);
             writer.write(Engine.getFullInput());
             writer.close();
@@ -35,8 +30,7 @@ public class SaveAndLoad {
      * @return the 2D TETile[][] representing the saved world state.
      */
     public static TETile[][] loadWorld() {
-        File dir = new File("byow/SavedGames");
-        File saveFile = new File(dir, "save.txt");
+        File saveFile = new File("save.txt");
 
         if (!saveFile.exists()) {
             System.out.println("No saved game found. Exiting.");
